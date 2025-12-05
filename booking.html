@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد - نظام حجز العيادات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2D5BFF;
+            --secondary: #00C9A7;
+            --accent: #FF6B9D;
+            --dark: #1A237E;
+            --light: #F8F9FF;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* الهيدر */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+        
+        .clinic-info {
+            margin-bottom: 20px;
+        }
+        
+        .clinic-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 35px;
+        }
+        
+        .clinic-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .clinic-specialty {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        /* المحتوى */
+        .content {
+            padding: 50px 30px 30px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: 0;
+            left: 0;
+            height: 2px;
+            background: #eee;
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 3px solid #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #999;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-number {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        /* النماذج */
+        .form-step {
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .form-step.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(45, 91, 255, 0.1);
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .time-slot:hover {
+            border-color: var(--primary);
+            background: rgba(45, 91, 255, 0.05);
+        }
+        
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .time-slot.booked {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* الأزرار */
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* رسالة النجاح */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            color: white;
+            font-size: 35px;
+        }
+        
+        .success-title {
+            font-size: 28px;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+        
+        .success-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: right;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* الفوتر */
+        .footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        
+        .whatsapp-help {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .content {
+                padding: 40px 20px 20px;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- الهيدر -->
+        <div class="header">
+            <div class="clinic-info">
+                <div class="clinic-logo">
+                    <i class="fas fa-hospital"></i>
+                </div>
+                <h1 class="clinic-name" id="clinicName">عيادة النخبة الطبية</h1>
+                <p class="clinic-specialty" id="clinicSpecialty">تخصصات متعددة - رعاية متكاملة</p>
+            </div>
+        </div>
+        
+        <!-- المحتوى -->
+        <div class="content">
+            <!-- مؤشر الخطوات -->
+            <div class="step-indicator">
+                <div class="step completed" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">البيانات</div>
+                </div>
+                <div class="step active" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">الطبيب</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">الوقت</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">التأكيد</div>
+                </div>
+            </div>
+            
+            <!-- خطوة 1: البيانات الشخصية -->
+            <div class="form-step active" id="step1-form">
+                <div class="form-group">
+                    <label for="patientName"><i class="fas fa-user"></i> الاسم الكامل</label>
+                    <input type="text" id="patientName" class="form-control" placeholder="أدخل اسمك الثلاثي" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="patientPhone"><i class="fas fa-phone"></i> رقم الهاتف</label>
+                    <input type="tel" id="patientPhone" class="form-control" placeholder="05XXXXXXXX" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="patientAge"><i class="fas fa-birthday-cake"></i> العمر (اختياري)</label>
+                    <input type="number" id="patientAge" class="form-control" placeholder="أدخل عمرك" min="1" max="120">
+                </div>
+                
+                <div class="form-buttons">
+                    <button class="btn btn-primary" onclick="nextStep(2)">
+                        التالي <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- خطوة 2: اختيار الطبيب -->
+            <div class="form-step" id="step2-form">
+                <div class="form-group">
+                    <label for="appointmentType"><i class="fas fa-stethoscope"></i> نوع الزيارة</label>
+                    <select id="appointmentType" class="form-control" required>
+                        <option value="">-- اختر نوع الزيارة --</option>
+                        <option value="استشارة">استشارة أولية</option>
+                        <option value="متابعة">متابعة حالة</option>
+                        <option value="فحص">فحص دوري</option>
+                        <option value="طوارئ">حالة طارئة</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="doctor"><i class="fas fa-user-md"></i> اختر الطبيب</label>
+                    <select id="doctor" class="form-control" required>
+                        <option value="">-- اختر الطبيب --</option>
+                        <option value="د. أحمد محمد - أسنان">د. أحمد محمد - أسنان</option>
+                        <option value="د. سارة علي - باطنة">د. سارة علي - باطنة</option>
+                        <option value="د. خالد حسن - عيون">د. خالد حسن - عيون</option>
+                        <option value="د. فاطمة عبدالله - جلدية">د. فاطمة عبدالله - جلدية</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="symptoms"><i class="fas fa-notes-medical"></i> وصف الحالة (اختياري)</label>
+                    <textarea id="symptoms" class="form-control" rows="3" placeholder="اشرح حالتك أو الأعراض التي تعاني منها..."></textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button class="btn btn-secondary" onclick="prevStep(1)">
+                        <i class="fas fa-arrow-right"></i> السابق
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep(3)">
+                        التالي <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- خطوة 3: اختيار التاريخ والوقت -->
+            <div class="form-step" id="step3-form">
+                <div class="form-group">
+                    <label for="appointmentDate"><i class="fas fa-calendar-alt"></i> اختر التاريخ</label>
+                    <input type="date" id="appointmentDate" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> اختر الوقت المناسب</label>
+                    <div class="time-slots" id="timeSlots">
+                        <!-- سيتم تعبئة الأوقات تلقائياً -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> ملاحظة:</label>
+                    <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; color: #0c5460; font-size: 14px;">
+                        <i class="fas fa-clock"></i> مدة كل موعد: 30 دقيقة
+                        <br>
+                        <i class="fas fa-bell"></i> سيصلك تذكير قبل الموعد بـ 24 ساعة
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <button class="btn btn-secondary" onclick="prevStep(2)">
+                        <i class="fas fa-arrow-right"></i> السابق
+                    </button>
+                    <button class="btn btn-primary" onclick="nextStep(4)">
+                        التالي <i class="fas fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- خطوة 4: تأكيد الحجز -->
+            <div class="form-step" id="step4-form">
+                <div class="form-group">
+                    <label><i class="fas fa-check-circle"></i> تأكيد المعلومات</label>
+                    <div class="success-details">
+                        <div class="detail-item">
+                            <span>الاسم:</span>
+                            <strong id="confirmName">-</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>الهاتف:</span>
+                            <strong id="confirmPhone">-</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>الطبيب:</span>
+                            <strong id="confirmDoctor">-</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>التاريخ:</span>
+                            <strong id="confirmDate">-</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>الوقت:</span>
+                            <strong id="confirmTime">-</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="specialRequests"><i class="fas fa-comment-medical"></i> طلبات خاصة (اختياري)</label>
+                    <textarea id="specialRequests" class="form-control" rows="2" placeholder="هل لديك أي طلبات خاصة؟"></textarea>
+                </div>
+                
+                <div class="form-buttons">
+                    <button class="btn btn-secondary" onclick="prevStep(3)">
+                        <i class="fas fa-arrow-right"></i> السابق
+                    </button>
+                    <button class="btn btn-primary" onclick="submitBooking()">
+                        <i class="fas fa-check"></i> تأكيد الحجز
+                    </button>
+                </div>
+            </div>
+            
+            <!-- رسالة النجاح -->
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="success-title">تم حجز موعدك بنجاح! 🎉</h2>
+                <p style="color: #666; margin-bottom: 20px;">شكراً لثقتك بنا. سيتم التواصل معك لتأكيد الموعد</p>
+                
+                <div class="success-details">
+                    <div class="detail-item">
+                        <span>رقم الحجز:</span>
+                        <strong id="bookingNumber">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>الاسم:</span>
+                        <strong id="successName">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>الطبيب:</span>
+                        <strong id="successDoctor">-</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>الموعد:</span>
+                        <strong id="successDateTime">-</strong>
+                    </div>
+                </div>
+                
+                <div style="margin: 30px 0;">
+                    <button class="btn btn-primary" onclick="sendWhatsApp()" style="background: #25D366;">
+                        <i class="fab fa-whatsapp"></i> إرسال تأكيد عبر واتساب
+                    </button>
+                </div>
+                
+                <p style="color: #666; font-size: 14px;">
+                    <i class="fas fa-info-circle"></i> سيصلك تذكير قبل الموعد بـ 24 ساعة
+                </p>
+            </div>
+        </div>
+        
+        <!-- الفوتر -->
+        <div class="footer">
+            <p>© 2024 نظام حجز مواعيد العيادات</p>
+            <div class="whatsapp-help">
+                <i class="fab fa-whatsapp"></i>
+                <span>للحجز المباشر: <strong id="clinicWhatsapp">05XXXXXXXX</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تهيئة النظام
+        document.addEventListener('DOMContentLoaded', function() {
+            // تعيين تاريخ اليوم كحد أدنى
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDate').min = today;
+            
+            // تعيين تاريخ بعد أسبوع كحد أقصى
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 30);
+            document.getElementById('appointmentDate').max = maxDate.toISOString().split('T')[0];
+            
+            // تعيين تاريخ الغد كافتراضي
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('appointmentDate').value = tomorrow.toISOString().split('T')[0];
+            
+            // توليد الأوقات المتاحة
+            generateTimeSlots();
+            
+            // تحميل إعدادات العيادة
+            loadClinicSettings();
+        });
+        
+        // توليد الأوقات المتاحة
+        function generateTimeSlots() {
+            const slots = [
+                '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+                '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+                '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+            ];
+            
+            // محاكاة أوقات محجوزة
+            const bookedSlots = ['10:00', '14:30', '15:00'];
+            
+            const container = document.getElementById('timeSlots');
+            container.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = bookedSlots.includes(slot) ? 'time-slot booked' : 'time-slot';
+                slotDiv.textContent = slot;
+                slotDiv.dataset.time = slot;
+                
+                if (!bookedSlots.includes(slot)) {
+                    slotDiv.addEventListener('click', function() {
+                        // إلغاء تحديد جميع الأوقات
+                        document.querySelectorAll('.time-slot').forEach(s => {
+                            s.classList.remove('selected');
+                        });
+                        // تحديد الوقت المختار
+                        this.classList.add('selected');
+                    });
+                } else {
+                    slotDiv.title = 'هذا الوقت محجوز';
+                }
+                
+                container.appendChild(slotDiv);
+            });
+        }
+        
+        // تحميل إعدادات العيادة
+        function loadClinicSettings() {
+            // يمكن تحميل من localStorage أو ملف config
+            const settings = {
+                clinicName: 'عيادة النخبة الطبية',
+                clinicSpecialty: 'أسنان - باطنة - عيون - جلدية',
+                whatsappNumber: '0551234567',
+                phoneNumber: '0112345678'
+            };
+            
+            document.getElementById('clinicName').textContent = settings.clinicName;
+            document.getElementById('clinicSpecialty').textContent = settings.clinicSpecialty;
+            document.getElementById('clinicWhatsapp').textContent = settings.whatsappNumber;
+        }
+        
+        // إدارة الخطوات
+        let currentStep = 1;
+        const steps = document.querySelectorAll('.step');
+        const stepForms = document.querySelectorAll('.form-step');
+        
+        function updateSteps() {
+            steps.forEach((step, index) => {
+                if (index + 1 < currentStep) {
+                    step.classList.remove('active');
+                    step.classList.add('completed');
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+            
+            stepForms.forEach((form, index) => {
+                if (index + 1 === currentStep) {
+                    form.classList.add('active');
+                } else {
+                    form.classList.remove('active');
+                }
+            });
+        }
+        
+        function nextStep(stepNumber) {
+            // التحقق من صحة البيانات قبل الانتقال
+            if (stepNumber === 2 && !validateStep1()) {
+                return;
+            }
+            if (stepNumber === 3 && !validateStep2()) {
+                return;
+            }
+            if (stepNumber === 4 && !validateStep3()) {
+                return;
+            }
+            
+            // تحديث صفحة التأكيد
+            if (stepNumber === 4) {
+                updateConfirmation();
+            }
+            
+            currentStep = stepNumber;
+            updateSteps();
+            scrollToTop();
+        }
+        
+        function prevStep(stepNumber) {
+            currentStep = stepNumber;
+            updateSteps();
+            scrollToTop();
+        }
+        
+        function scrollToTop() {
+            document.querySelector('.content').scrollTop = 0;
+        }
+        
+        // التحقق من صحة البيانات
+        function validateStep1() {
+            const name = document.getElementById('patientName').value.trim();
+            const phone = document.getElementById('patientPhone').value.trim();
+            
+            if (!name) {
+                alert('الرجاء إدخال الاسم الكامل');
+                return false;
+            }
+            
+            if (!phone || phone.length < 10) {
+                alert('الرجاء إدخال رقم هاتف صحيح');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function validateStep2() {
+            const doctor = document.getElementById('doctor').value;
+            const appointmentType = document.getElementById('appointmentType').value;
+            
+            if (!appointmentType) {
+                alert('الرجاء اختيار نوع الزيارة');
+                return false;
+            }
+            
+            if (!doctor) {
+                alert('الرجاء اختيار الطبيب');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function validateStep3() {
+            const date = document.getElementById('appointmentDate').value;
+            const selectedTime = document.querySelector('.time-slot.selected');
+            
+            if (!date) {
+                alert('الرجاء اختيار تاريخ للموعد');
+                return false;
+            }
+            
+            if (!selectedTime) {
+                alert('الرجاء اختيار وقت للموعد');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // تحديث صفحة التأكيد
+        function updateConfirmation() {
+            document.getElementById('confirmName').textContent = document.getElementById('patientName').value;
+            document.getElementById('confirmPhone').textContent = document.getElementById('patientPhone').value;
+            document.getElementById('confirmDoctor').textContent = document.getElementById('doctor').value;
+            
+            const date = new Date(document.getElementById('appointmentDate').value);
+            document.getElementById('confirmDate').textContent = date.toLocaleDateString('ar-EG');
+            
+            const selectedTime = document.querySelector('.time-slot.selected');
+            document.getElementById('confirmTime').textContent = selectedTime ? selectedTime.textContent : '-';
+        }
+        
+        // إرسال الحجز
+        function submitBooking() {
+            // جمع البيانات
+            const bookingData = {
+                id: 'BK' + Date.now().toString().slice(-8),
+                name: document.getElementById('patientName').value,
+                phone: document.getElementById('patientPhone').value,
+                age: document.getElementById('patientAge').value || 'غير محدد',
+                doctor: document.getElementById('doctor').value,
+                appointmentType: document.getElementById('appointmentType').value,
+                date: document.getElementById('appointmentDate').value,
+                time: document.querySelector('.time-slot.selected').textContent,
+                symptoms: document.getElementById('symptoms').value,
+                specialRequests: document.getElementById('specialRequests').value,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            
+            // حفظ في localStorage
+            let bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            bookings.push(bookingData);
+            localStorage.setItem('clinic_bookings', JSON.stringify(bookings));
+            
+            // إظهار رسالة النجاح
+            showSuccessMessage(bookingData);
+            
+            // تحديث الخطوة الأخيرة
+            document.getElementById('step4').classList.add('completed');
+            
+            // إرسال إشعار واتساب (محاكاة)
+            setTimeout(() => {
+                simulateWhatsAppNotification(bookingData);
+            }, 1000);
+        }
+        
+        // عرض رسالة النجاح
+        function showSuccessMessage(bookingData) {
+            // تعبئة البيانات
+            document.getElementById('bookingNumber').textContent = bookingData.id;
+            document.getElementById('successName').textContent = bookingData.name;
+            document.getElementById('successDoctor').textContent = bookingData.doctor;
+            
+            const date = new Date(bookingData.date);
+            const formattedDate = date.toLocaleDateString('ar-EG', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            document.getElementById('successDateTime').textContent = `${formattedDate} الساعة ${bookingData.time}`;
+            
+            // إخفاء النموذج وإظهار رسالة النجاح
+            document.getElementById('step4-form').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+        }
+        
+        // محاكاة إرسال واتساب
+        function sendWhatsApp() {
+            const bookingData = {
+                name: document.getElementById('patientName').value,
+                phone: document.getElementById('patientPhone').value,
+                doctor: document.getElementById('doctor').value,
+                date: document.getElementById('appointmentDate').value,
+                time: document.querySelector('.time-slot.selected').textContent
+            };
+            
+            const message = `🎯 تأكيد حجز موعد طبي
+            
+✅ تم حجز موعدك بنجاح!
+
+👤 المريض: ${bookingData.name}
+📞 الهاتف: ${bookingData.phone}
+👨‍⚕️ الطبيب: ${bookingData.doctor}
+📅 التاريخ: ${new Date(bookingData.date).toLocaleDateString('ar-EG')}
+⏰ الوقت: ${bookingData.time}
+
+💡 ملاحظات:
+• يرجى الحضور قبل الموعد بـ 10 دقائق
+• أحضر معك جميع التقارير السابقة
+• للإلغاء أو التعديل، اتصل بالعيادة
+
+📍 العنوان: شارع الملك فهد، الرياض
+📞 الهاتف: 0112345678
+
+شكراً لثقتك بنا ❤️`;
+            
+            // في النظام الحقيقي، نستخدم:
+            // const whatsappUrl = `https://wa.me/966551234567?text=${encodeURIComponent(message)}`;
+            // window.open(whatsappUrl, '_blank');
+            
+            // للمحاكاة:
+            alert('🎯 محاكاة إشعار واتساب:\n\n' + message);
+        }
+        
+        function simulateWhatsAppNotification(bookingData) {
+            // في النظام الحقيقي، هذا الكود يرسل إشعاراً للعيادة
+            const notificationMessage = `📋 حجز جديد!
+            
+👤 مريض جديد: ${bookingData.name}
+📞 الهاتف: ${bookingData.phone}
+👨‍⚕️ الطبيب: ${bookingData.doctor}
+📅 التاريخ: ${new Date(bookingData.date).toLocaleDateString('ar-EG')}
+⏰ الوقت: ${bookingData.time}
+📝 النوع: ${bookingData.appointmentType}
+
+🔢 رقم الحجز: ${bookingData.id}`;
+            
+            console.log('📲 إشعار واتساب للمسؤول:', notificationMessage);
+            // في الإصدار الحقيقي، نستخدم:
+            // fetch('/api/send-whatsapp', { method: 'POST', body: JSON.stringify({message: notificationMessage}) })
+        }
+    </script>
+</body>
+</html>
