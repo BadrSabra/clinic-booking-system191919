@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الإعدادات - نظام حجز العيادات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2D5BFF;
+            --secondary: #00C9A7;
+            --accent: #FF6B9D;
+            --dark: #1A237E;
+            --light: #F8F9FF;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: #F5F7FA;
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .settings-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        /* الهيدر */
+        .settings-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title h1 {
+            color: var(--dark);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header-title p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* محتوى الإعدادات */
+        .settings-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+        }
+        
+        /* القائمة الجانبية */
+        .settings-sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .settings-menu {
+            list-style: none;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        
+        .menu-item:hover {
+            background: #f8f9fa;
+            color: var(--primary);
+            border-right: 4px solid var(--primary);
+        }
+        
+        .menu-item.active {
+            background: rgba(45, 91, 255, 0.05);
+            color: var(--primary);
+            border-right: 4px solid var(--primary);
+            font-weight: 600;
+        }
+        
+        .menu-item i {
+            font-size: 20px;
+            margin-left: 15px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* محتوى الإعدادات */
+        .settings-panel {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .panel-header h2 {
+            color: var(--dark);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-content {
+            padding: 30px;
+        }
+        
+        /* نماذج الإعدادات */
+        .settings-form {
+            max-width: 800px;
+        }
+        
+        .form-section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: var(--dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(45, 91, 255, 0.1);
+        }
+        
+        .form-help {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .form-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+        
+        /* قائمة الأطباء */
+        .doctors-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .doctor-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .doctor-info h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .doctor-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .doctor-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* أوقات العمل */
+        .working-hours {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .day-schedule {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .day-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .day-status {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 15px;
+            background: #e8f4fd;
+            color: #0c5460;
+        }
+        
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        /* الأزرار */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        /* متجاوبية */
+        @media (max-width: 992px) {
+            .settings-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 15px;
+            }
+            
+            .panel-content {
+                padding: 20px;
+            }
+            
+            .doctor-item {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <!-- هيدر الإعدادات -->
+        <div class="settings-header">
+            <div class="header-title">
+                <h1><i class="fas fa-cog"></i> إعدادات النظام</h1>
+                <p>قم بتخصيص نظام حجز المواعيد ليناسب عيادتك</p>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="location.href='dashboard.html'">
+                    <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+                </button>
+                <button class="btn btn-primary" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i> حفظ جميع التغييرات
+                </button>
+            </div>
+        </div>
+        
+        <!-- محتوى الإعدادات -->
+        <div class="settings-content">
+            <!-- القائمة الجانبية -->
+            <div class="settings-sidebar">
+                <ul class="settings-menu">
+                    <li>
+                        <a class="menu-item active" data-target="general">
+                            <i class="fas fa-hospital"></i>
+                            <span>معلومات العيادة</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-target="doctors">
+                            <i class="fas fa-user-md"></i>
+                            <span>قائمة الأطباء</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-target="working-hours">
+                            <i class="fas fa-clock"></i>
+                            <span>أوقات العمل</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-target="booking">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>إعدادات الحجز</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-target="notifications">
+                            <i class="fas fa-bell"></i>
+                            <span>الإشعارات</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-target="payment">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>المدفوعات</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-target="integration">
+                            <i class="fas fa-plug"></i>
+                            <span>التكامل</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- لوحة الإعدادات -->
+            <div class="settings-panel">
+                <!-- معلومات العيادة -->
+                <div class="panel-content active" id="general-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-hospital"></i> معلومات العيادة</h2>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <form class="settings-form">
+                            <div class="form-section">
+                                <h3 class="section-title">البيانات الأساسية</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">اسم العيادة</label>
+                                        <input type="text" id="clinicName" class="form-control" value="عيادة النخبة الطبية" required>
+                                        <div class="form-help">اسم العيادة كما سيظهر للمرضى</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">التخصص الرئيسي</label>
+                                        <input type="text" id="clinicSpecialty" class="form-control" value="تخصصات متعددة - رعاية متكاملة">
+                                        <div class="form-help">التخصص الذي تريد إبرازه</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">رقم الهاتف الرئيسي</label>
+                                        <input type="tel" id="clinicPhone" class="form-control" value="0112345678" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">رقم الواتساب</label>
+                                        <input type="tel" id="clinicWhatsapp" class="form-control" value="0551234567" required>
+                                        <div class="form-help">رقم واتساب الاستقبال</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">البريد الإلكتروني</label>
+                                    <input type="email" id="clinicEmail" class="form-control" value="info@clinic.com">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">عنوان العيادة</label>
+                                    <textarea id="clinicAddress" class="form-control" rows="3">شارع الملك فهد، الرياض، المملكة العربية السعودية</textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="section-title">المظهر والشعار</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">اللون الرئيسي</label>
+                                        <input type="color" id="primaryColor" class="form-control" value="#2D5BFF" style="height: 50px; padding: 5px;">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">اللون الثانوي</label>
+                                        <input type="color" id="secondaryColor" class="form-control" value="#00C9A7" style="height: 50px; padding: 5px;">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">شعار العيادة</label>
+                                    <div style="display: flex; gap: 20px; align-items: center;">
+                                        <div style="width: 100px; height: 100px; background: #f0f0f0; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #999;">
+                                            <i class="fas fa-hospital"></i>
+                                        </div>
+                                        <div>
+                                            <input type="file" id="clinicLogo" accept="image/*" style="display: none;">
+                                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('clinicLogo').click()">
+                                                <i class="fas fa-upload"></i> رفع شعار جديد
+                                            </button>
+                                            <div class="form-help">الحجم الموصى به: 300×300 بكسل</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- قائمة الأطباء -->
+                <div class="panel-content" id="doctors-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-user-md"></i> إدارة الأطباء</h2>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <form class="settings-form">
+                            <div class="form-section">
+                                <h3 class="section-title">إضافة طبيب جديد</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">اسم الطبيب</label>
+                                        <input type="text" id="newDoctorName" class="form-control" placeholder="أدخل اسم الطبيب">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">التخصص</label>
+                                        <input type="text" id="newDoctorSpecialty" class="form-control" placeholder="أدخل التخصص">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">رقم الهاتف</label>
+                                        <input type="tel" id="newDoctorPhone" class="form-control" placeholder="رقم هاتف الطبيب">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">البريد الإلكتروني</label>
+                                        <input type="email" id="newDoctorEmail" class="form-control" placeholder="بريد الطبيب">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">ملاحظات</label>
+                                    <textarea id="newDoctorNotes" class="form-control" rows="2" placeholder="ملاحظات إضافية..."></textarea>
+                                </div>
+                                
+                                <button type="button" class="btn btn-success" onclick="addNewDoctor()">
+                                    <i class="fas fa-plus"></i> إضافة الطبيب
+                                </button>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="section-title">قائمة الأطباء</h3>
+                                
+                                <div class="doctors-list" id="doctorsList">
+                                    <!-- سيتم تعبئة الأطباء تلقائياً -->
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- أوقات العمل -->
+                <div class="panel-content" id="working-hours-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-clock"></i> أوقات العمل</h2>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <form class="settings-form">
+                            <div class="form-section">
+                                <h3 class="section-title">جدول العمل الأسبوعي</h3>
+                                
+                                <div class="working-hours" id="workingHours">
+                                    <!-- سيتم تعبئة أوقات العمل تلقائياً -->
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="section-title">إعدادات إضافية</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">مدة كل موعد (دقائق)</label>
+                                        <select id="slotDuration" class="form-control">
+                                            <option value="15">15 دقيقة</option>
+                                            <option value="30" selected>30 دقيقة</option>
+                                            <option value="45">45 دقيقة</option>
+                                            <option value="60">60 دقيقة</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">الفاصل بين المواعيد (دقائق)</label>
+                                        <select id="bufferTime" class="form-control">
+                                            <option value="5">5 دقائق</option>
+                                            <option value="10" selected>10 دقائق</option>
+                                            <option value="15">15 دقائق</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">الحد الأقصى للحجوزات اليومية</label>
+                                    <input type="number" id="maxDailyBookings" class="form-control" value="50" min="1" max="200">
+                                    <div class="form-help">الحد الأقصى لعدد الحجوزات في اليوم الواحد</div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- إعدادات الحجز -->
+                <div class="panel-content" id="booking-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-calendar-alt"></i> إعدادات الحجز</h2>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <form class="settings-form">
+                            <div class="form-section">
+                                <h3 class="section-title">فترة الحجز</h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">الحد الأدنى للحجز المسبق (ساعات)</label>
+                                        <input type="number" id="minBookingHours" class="form-control" value="2" min="1" max="48">
+                                        <div class="form-help">الحد الأدنى من الوقت المطلوب قبل الموعد</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">الحد الأقصى للحجز المسبق (أيام)</label>
+                                        <input type="number" id="maxBookingDays" class="form-control" value="30" min="1" max="90">
+                                        <div class="form-help">الحد الأقصى للحجز مسبقاً</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">سياسة الإلغاء (ساعات)</label>
+                                    <input type="number" id="cancellationHours" class="form-control" value="24" min="1" max="72">
+                                    <div class="form-help">الحد الأدنى من الوقت المطلوب للإلغاء قبل الموعد</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="section-title">إعدادات إضافية</h3>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="allowOnlineBooking" checked>
+                                    <label for="allowOnlineBooking">السماح بالحجز عبر الإنترنت</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="requireDeposit">
+                                    <label for="requireDeposit">طلب وديعة للحجز</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="autoConfirm" checked>
+                                    <label for="autoConfirm">التأكيد التلقائي للحجوزات</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="multipleDoctors" checked>
+                                    <label for="multipleDoctors">السماح باختيار الطبيب</label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- الإشعارات -->
+                <div class="panel-content" id="notifications-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-bell"></i> إعدادات الإشعارات</h2>
+                    </div>
+                    
+                    <div class="panel-content">
+                        <form class="settings-form">
+                            <div class="form-section">
+                                <h3 class="section-title">إشعارات واتساب</h3>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="whatsappConfirmation" checked>
+                                    <label for="whatsappConfirmation">إرسال تأكيد الحجز عبر واتساب</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="whatsappReminder" checked>
+                                    <label for="whatsappReminder">إرسال تذكير قبل الموعد بـ 24 ساعة</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="whatsappFollowup">
+                                    <label for="whatsappFollowup">إرسال متابعة بعد الزيارة</label>
+                                </div>
+                                
+                                <div class="form-group" style="margin-top: 20px;">
+                                    <label class="form-label">نص تأكيد الحجز</label>
+                                    <textarea id="whatsappTemplate" class="form-control" rows="4">🎯 تأكيد حجز موعد طبي
+
+✅ تم حجز موعدك بنجاح!
+
+👤 المريض: {{patientName}}
+📞 الهاتف: {{patientPhone}}
+👨‍⚕️ الطبيب: {{doctorName}}
+📅 التاريخ: {{appointmentDate}}
+⏰ الوقت: {{appointmentTime}}
+
+📍 العنوان: {{clinicAddress}}
+📞 الهاتف: {{clinicPhone}}
+
+يرجى الحضور قبل الموعد بـ 10 دقائق.
+للتعديل أو الإلغاء، اتصل بالعيادة.
+
+شكراً لثقتك بنا ❤️</textarea>
+                                    <div class="form-help">استخدم {{variable}} لإضافة متغيرات ديناميكية</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h3 class="section-title">إشعارات SMS</h3>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="smsConfirmation">
+                                    <label for="smsConfirmation">إرسال تأكيد الحجز عبر SMS</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input type="checkbox" id="smsReminder">
+                                    <label for="smsReminder">إرسال تذكير قبل الموعد بـ 3 ساعات</label>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">مزود خدمة SMS</label>
+                                        <select id="smsProvider" class="form-control">
+                                            <option value="">اختر مزود الخدمة</option>
+                                            <option value="twilio">Twilio</option>
+                                            <option value="smsa">SMSA</option>
+                                            <option value="mobi">Mobi</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">معرف API</label>
+                                        <input type="text" id="smsApiKey" class="form-control" placeholder="أدخل معرف API">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- أزرار الحفظ -->
+                <div class="panel-content" style="border-top: 1px solid #f0f0f0; padding: 30px;">
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="saveAllSettings()">
+                            <i class="fas fa-save"></i> حفظ جميع الإعدادات
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetToDefault()">
+                            <i class="fas fa-undo"></i> إعادة تعيين
+                        </button>
+                        <button class="btn" style="background: #f8f9fa; color: #666;" onclick="location.href='dashboard.html'">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تهيئة الإعدادات
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            loadDoctors();
+            loadWorkingHours();
+            setupMenuNavigation();
+        });
+        
+        // تحميل الإعدادات
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+            
+            // إذا لم تكن هناك إعدادات، أنشئ إعدادات افتراضية
+            if (!settings.general) {
+                const defaultSettings = {
+                    general: {
+                        clinicName: 'عيادة النخبة الطبية',
+                        clinicSpecialty: 'تخصصات متعددة - رعاية متكاملة',
+                        clinicPhone: '0112345678',
+                        clinicWhatsapp: '0551234567',
+                        clinicEmail: 'info@clinic.com',
+                        clinicAddress: 'شارع الملك فهد، الرياض، المملكة العربية السعودية',
+                        primaryColor: '#2D5BFF',
+                        secondaryColor: '#00C9A7'
+                    },
+                    doctors: [],
+                    workingHours: {
+                        sunday: { open: '09:00', close: '17:00', active: true },
+                        monday: { open: '09:00', close: '17:00', active: true },
+                        tuesday: { open: '09:00', close: '17:00', active: true },
+                        wednesday: { open: '09:00', close: '17:00', active: true },
+                        thursday: { open: '09:00', close: '17:00', active: true },
+                        friday: { open: '16:00', close: '20:00', active: true },
+                        saturday: { open: '09:00', close: '14:00', active: false }
+                    },
+                    booking: {
+                        slotDuration: 30,
+                        bufferTime: 10,
+                        maxDailyBookings: 50,
+                        minBookingHours: 2,
+                        maxBookingDays: 30,
+                        cancellationHours: 24,
+                        allowOnlineBooking: true,
+                        requireDeposit: false,
+                        autoConfirm: true,
+                        multipleDoctors: true
+                    },
+                    notifications: {
+                        whatsappConfirmation: true,
+                        whatsappReminder: true,
+                        whatsappFollowup: false,
+                        whatsappTemplate: `🎯 تأكيد حجز موعد طبي\n\n✅ تم حجز موعدك بنجاح!\n\n👤 المريض: {{patientName}}\n📞 الهاتف: {{patientPhone}}\n👨‍⚕️ الطبيب: {{doctorName}}\n📅 التاريخ: {{appointmentDate}}\n⏰ الوقت: {{appointmentTime}}\n\n📍 العنوان: {{clinicAddress}}\n📞 الهاتف: {{clinicPhone}}\n\nيرجى الحضور قبل الموعد بـ 10 دقائق.\nللتعديل أو الإلغاء، اتصل بالعيادة.\n\nشكراً لثقتك بنا ❤️`,
+                        smsConfirmation: false,
+                        smsReminder: false,
+                        smsProvider: '',
+                        smsApiKey: ''
+                    },
+                    payment: {
+                        currency: 'SAR',
+                        requirePayment: false,
+                        depositAmount: 50,
+                        paymentMethods: ['cash', 'card']
+                    }
+                };
+                
+                localStorage.setItem('clinic_settings', JSON.stringify(defaultSettings));
+                location.reload();
+                return;
+            }
+            
+            // تعبئة نموذج معلومات العيادة
+            if (settings.general) {
+                document.getElementById('clinicName').value = settings.general.clinicName || '';
+                document.getElementById('clinicSpecialty').value = settings.general.clinicSpecialty || '';
+                document.getElementById('clinicPhone').value = settings.general.clinicPhone || '';
+                document.getElementById('clinicWhatsapp').value = settings.general.clinicWhatsapp || '';
+                document.getElementById('clinicEmail').value = settings.general.clinicEmail || '';
+                document.getElementById('clinicAddress').value = settings.general.clinicAddress || '';
+                document.getElementById('primaryColor').value = settings.general.primaryColor || '#2D5BFF';
+                document.getElementById('secondaryColor').value = settings.general.secondaryColor || '#00C9A7';
+            }
+            
+            // تعبئة إعدادات الحجز
+            if (settings.booking) {
+                document.getElementById('slotDuration').value = settings.booking.slotDuration || 30;
+                document.getElementById('bufferTime').value = settings.booking.bufferTime || 10;
+                document.getElementById('maxDailyBookings').value = settings.booking.maxDailyBookings || 50;
+                document.getElementById('minBookingHours').value = settings.booking.minBookingHours || 2;
+                document.getElementById('maxBookingDays').value = settings.booking.maxBookingDays || 30;
+                document.getElementById('cancellationHours').value = settings.booking.cancellationHours || 24;
+                document.getElementById('allowOnlineBooking').checked = settings.booking.allowOnlineBooking || false;
+                document.getElementById('requireDeposit').checked = settings.booking.requireDeposit || false;
+                document.getElementById('autoConfirm').checked = settings.booking.autoConfirm || false;
+                document.getElementById('multipleDoctors').checked = settings.booking.multipleDoctors || false;
+            }
+            
+            // تعبئة إعدادات الإشعارات
+            if (settings.notifications) {
+                document.getElementById('whatsappConfirmation').checked = settings.notifications.whatsappConfirmation || false;
+                document.getElementById('whatsappReminder').checked = settings.notifications.whatsappReminder || false;
+                document.getElementById('whatsappFollowup').checked = settings.notifications.whatsappFollowup || false;
+                document.getElementById('whatsappTemplate').value = settings.notifications.whatsappTemplate || '';
+                document.getElementById('smsConfirmation').checked = settings.notifications.smsConfirmation || false;
+                document.getElementById('smsReminder').checked = settings.notifications.smsReminder || false;
+                document.getElementById('smsProvider').value = settings.notifications.smsProvider || '';
+                document.getElementById('smsApiKey').value = settings.notifications.smsApiKey || '';
+            }
+        }
+        
+        // تحميل قائمة الأطباء
+        function loadDoctors() {
+            const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+            const doctors = settings.doctors || [];
+            const doctorsList = document.getElementById('doctorsList');
+            
+            doctorsList.innerHTML = '';
+            
+            if (doctors.length === 0) {
+                doctorsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-user-md" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
+                        <p>لا توجد أطباء مضافة بعد</p>
+                        <p style="font-size: 14px; margin-top: 10px;">أضف أول طبيب باستخدام النموذج أعلاه</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            doctors.forEach((doctor, index) => {
+                const doctorDiv = document.createElement('div');
+                doctorDiv.className = 'doctor-item';
+                doctorDiv.innerHTML = `
+                    <div class="doctor-info">
+                        <h4>${doctor.name}</h4>
+                        <p>${doctor.specialty}</p>
+                        <p style="font-size: 12px; color: #999;">${doctor.phone} • ${doctor.email}</p>
+                    </div>
+                    <div class="doctor-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="editDoctor(${index})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteDoctor(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                doctorsList.appendChild(doctorDiv);
+            });
+        }
+        
+        // تحميل أوقات العمل
+        function loadWorkingHours() {
+            const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+            const workingHours = settings.workingHours || {};
+            const daysContainer = document.getElementById('workingHours');
+            
+            const days = [
+                { id: 'sunday', name: 'الأحد' },
+                { id: 'monday', name: 'الإثنين' },
+                { id: 'tuesday', name: 'الثلاثاء' },
+                { id: 'wednesday', name: 'الأربعاء' },
+                { id: 'thursday', name: 'الخميس' },
+                { id: 'friday', name: 'الجمعة' },
+                { id: 'saturday', name: 'السبت' }
+            ];
+            
+            daysContainer.innerHTML = '';
+            
+            days.forEach(day => {
+                const schedule = workingHours[day.id] || { open: '09:00', close: '17:00', active: true };
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-schedule';
+                dayDiv.innerHTML = `
+                    <div class="day-header">
+                        <span class="day-name">${day.name}</span>
+                        <span class="day-status" style="background: ${schedule.active ? '#d4edda' : '#f8d7da'}; color: ${schedule.active ? '#155724' : '#721c24'}">
+                            ${schedule.active ? 'مفتوح' : 'مغلق'}
+                        </span>
+                    </div>
+                    <div class="time-inputs">
+                        <input type="time" id="${day.id}-open" value="${schedule.open}" ${!schedule.active ? 'disabled' : ''}>
+                        <input type="time" id="${day.id}-close" value="${schedule.close}" ${!schedule.active ? 'disabled' : ''}>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label style="font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="${day.id}-active" ${schedule.active ? 'checked' : ''} onchange="toggleDay('${day.id}')">
+                            ${schedule.active ? 'مفتوح' : 'مغلق'}
+                        </label>
+                    </div>
+                `;
+                daysContainer.appendChild(dayDiv);
+            });
+        }
+        
+        // تبديل حالة يوم
+        function toggleDay(dayId) {
+            const isActive = document.getElementById(`${dayId}-active`).checked;
+            document.getElementById(`${dayId}-open`).disabled = !isActive;
+            document.getElementById(`${dayId}-close`).disabled = !isActive;
+        }
+        
+        // إضافة طبيب جديد
+        function addNewDoctor() {
+            const name = document.getElementById('newDoctorName').value.trim();
+            const specialty = document.getElementById('newDoctorSpecialty').value.trim();
+            const phone = document.getElementById('newDoctorPhone').value.trim();
+            const email = document.getElementById('newDoctorEmail').value.trim();
+            const notes = document.getElementById('newDoctorNotes').value.trim();
+            
+            if (!name || !specialty) {
+                alert('الرجاء إدخال اسم الطبيب وتخصصه');
+                return;
+            }
+            
+            const newDoctor = {
+                id: 'DR' + Date.now().toString().slice(-6),
+                name,
+                specialty,
+                phone,
+                email,
+                notes,
+                active: true
+            };
+            
+            const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+            if (!settings.doctors) settings.doctors = [];
+            settings.doctors.push(newDoctor);
+            localStorage.setItem('clinic_settings', JSON.stringify(settings));
+            
+            // تفريغ النموذج
+            document.getElementById('newDoctorName').value = '';
+            document.getElementById('newDoctorSpecialty').value = '';
+            document.getElementById('newDoctorPhone').value = '';
+            document.getElementById('newDoctorEmail').value = '';
+            document.getElementById('newDoctorNotes').value = '';
+            
+            // إعادة تحميل القائمة
+            loadDoctors();
+            
+            alert('تم إضافة الطبيب بنجاح');
+        }
+        
+        // تعديل طبيب
+        function editDoctor(index) {
+            alert(`تعديل الطبيب رقم ${index + 1}`);
+            // في النظام الحقيقي، نفتح مودال التعديل
+        }
+        
+        // حذف طبيب
+        function deleteDoctor(index) {
+            if (confirm('هل تريد حذف هذا الطبيب؟')) {
+                const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+                if (settings.doctors && settings.doctors[index]) {
+                    settings.doctors.splice(index, 1);
+                    localStorage.setItem('clinic_settings', JSON.stringify(settings));
+                    loadDoctors();
+                    alert('تم حذف الطبيب بنجاح');
+                }
+            }
+        }
+        
+        // إدارة القائمة الجانبية
+        function setupMenuNavigation() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const panels = document.querySelectorAll('.panel-content');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const target = this.dataset.target;
+                    
+                    // إزالة النشط من جميع العناصر
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    panels.forEach(p => p.classList.remove('active'));
+                    
+                    // إضافة النشط للعنصر المحدد
+                    this.classList.add('active');
+                    document.getElementById(`${target}-panel`).classList.add('active');
+                });
+            });
+        }
+        
+        // حفظ جميع الإعدادات
+        function saveAllSettings() {
+            const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+            
+            // حفظ معلومات العيادة
+            settings.general = {
+                clinicName: document.getElementById('clinicName').value,
+                clinicSpecialty: document.getElementById('clinicSpecialty').value,
+                clinicPhone: document.getElementById('clinicPhone').value,
+                clinicWhatsapp: document.getElementById('clinicWhatsapp').value,
+                clinicEmail: document.getElementById('clinicEmail').value,
+                clinicAddress: document.getElementById('clinicAddress').value,
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value
+            };
+            
+            // حفظ إعدادات الحجز
+            settings.booking = {
+                slotDuration: parseInt(document.getElementById('slotDuration').value),
+                bufferTime: parseInt(document.getElementById('bufferTime').value),
+                maxDailyBookings: parseInt(document.getElementById('maxDailyBookings').value),
+                minBookingHours: parseInt(document.getElementById('minBookingHours').value),
+                maxBookingDays: parseInt(document.getElementById('maxBookingDays').value),
+                cancellationHours: parseInt(document.getElementById('cancellationHours').value),
+                allowOnlineBooking: document.getElementById('allowOnlineBooking').checked,
+                requireDeposit: document.getElementById('requireDeposit').checked,
+                autoConfirm: document.getElementById('autoConfirm').checked,
+                multipleDoctors: document.getElementById('multipleDoctors').checked
+            };
+            
+            // حفظ أوقات العمل
+            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            days.forEach(day => {
+                settings.workingHours[day] = {
+                    open: document.getElementById(`${day}-open`).value,
+                    close: document.getElementById(`${day}-close`).value,
+                    active: document.getElementById(`${day}-active`).checked
+                };
+            });
+            
+            // حفظ إعدادات الإشعارات
+            settings.notifications = {
+                whatsappConfirmation: document.getElementById('whatsappConfirmation').checked,
+                whatsappReminder: document.getElementById('whatsappReminder').checked,
+                whatsappFollowup: document.getElementById('whatsappFollowup').checked,
+                whatsappTemplate: document.getElementById('whatsappTemplate').value,
+                smsConfirmation: document.getElementById('smsConfirmation').checked,
+                smsReminder: document.getElementById('smsReminder').checked,
+                smsProvider: document.getElementById('smsProvider').value,
+                smsApiKey: document.getElementById('smsApiKey').value
+            };
+            
+            // حفظ في localStorage
+            localStorage.setItem('clinic_settings', JSON.stringify(settings));
+            
+            // تحديث صفحات النظام الأخرى
+            updateOtherPages(settings);
+            
+            alert('✅ تم حفظ جميع الإعدادات بنجاح');
+        }
+        
+        // تحديث الصفحات الأخرى
+        function updateOtherPages(settings) {
+            // تحديث صفحة الحجز
+            const bookingPage = localStorage.getItem('booking_page');
+            if (bookingPage) {
+                // تحديث بيانات العيادة في صفحة الحجز
+                // (في النظام الحقيقي، نقوم بتحديث الملفات أو قاعدة البيانات)
+            }
+            
+            // تحديث لوحة التحكم
+            const dashboardPage = localStorage.getItem('dashboard_page');
+            if (dashboardPage) {
+                // تحديث بيانات لوحة التحكم
+            }
+            
+            console.log('تم تحديث إعدادات النظام:', settings);
+        }
+        
+        // إعادة تعيين للإعدادات الافتراضية
+        function resetToDefault() {
+            if (confirm('هل تريد إعادة تعيين جميع الإعدادات إلى الافتراضية؟ سيتم فقدان جميع التغييرات.')) {
+                localStorage.removeItem('clinic_settings');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
