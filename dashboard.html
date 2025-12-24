@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -5,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - نظام حجز العيادات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="setup.js"></script>
+    <script src="config.js"></script>
     <style>
         :root {
             --primary: #2D5BFF;
@@ -648,16 +651,59 @@
                 text-align: center;
             }
         }
+        
+        /* تحسينات إضافية */
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+        
+        .loading i {
+            font-size: 40px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+        
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
     </style>
 </head>
 <body>
+    <!-- تحقق من تسجيل الدخول -->
+    <div id="authCheck" class="alert alert-danger" style="display: none;">
+        <strong>تنبيه!</strong> يجب تسجيل الدخول للوصول لهذه الصفحة.
+    </div>
+
     <!-- الشريط الجانبي -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="clinic-logo">
                 <i class="fas fa-hospital"></i>
             </div>
-            <h3 class="clinic-name">عيادة النخبة الطبية</h3>
+            <h3 class="clinic-name" id="clinicName">عيادة النخبة الطبية</h3>
             <span class="clinic-status">● نشطة</span>
         </div>
         
@@ -675,7 +721,7 @@
                         <a class="menu-item" href="#">
                             <i class="fas fa-calendar-alt"></i>
                             <span>الحجوزات</span>
-                            <span class="badge">15</span>
+                            <span class="badge" id="bookingsBadge">0</span>
                         </a>
                     </li>
                     <li>
@@ -712,7 +758,7 @@
                         <a class="menu-item" href="#">
                             <i class="fas fa-bell"></i>
                             <span>الإشعارات</span>
-                            <span class="badge">3</span>
+                            <span class="badge" id="notificationsBadge">0</span>
                         </a>
                     </li>
                     <li>
@@ -745,6 +791,12 @@
                             <span>تصدير البيانات</span>
                         </a>
                     </li>
+                    <li>
+                        <a class="menu-item" href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>تسجيل الخروج</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -755,219 +807,228 @@
                     <i class="fas fa-user-md"></i>
                 </div>
                 <div class="user-details">
-                    <h4>د. أحمد محمد</h4>
-                    <p>طبيب أسنان</p>
+                    <h4 id="userName">د. أحمد محمد</h4>
+                    <p id="userRole">طبيب أسنان</p>
                 </div>
             </div>
         </div>
     </div>
     
     <!-- المحتوى الرئيسي -->
-    <div class="main-content">
-        <!-- الشريط العلوي -->
-        <div class="top-bar">
-            <div class="page-title">
-                <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
-                <p>مرحباً دكتور أحمد، إليك نظرة عامة على عيادتك</p>
-            </div>
-            
-            <div class="top-actions">
-                <div class="search-box">
-                    <input type="text" placeholder="ابحث عن مريض أو حجز...">
-                    <i class="fas fa-search"></i>
+    <div class="main-content" id="mainContent">
+        <!-- شاشة التحميل -->
+        <div class="loading" id="loadingScreen">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>جاري تحميل البيانات...</p>
+        </div>
+        
+        <!-- المحتوى الفعلي -->
+        <div id="contentArea" style="display: none;">
+            <!-- الشريط العلوي -->
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
+                    <p id="welcomeMessage">مرحباً دكتور أحمد، إليك نظرة عامة على عيادتك</p>
                 </div>
                 
-                <button class="notification-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
-                
-                <button class="menu-toggle" onclick="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <div class="user-menu">
-                    <div class="user-avatar" style="width: 35px; height: 35px; font-size: 16px;">
-                        <i class="fas fa-user-md"></i>
+                <div class="top-actions">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="ابحث عن مريض أو حجز..." onkeyup="searchBookings()">
+                        <i class="fas fa-search"></i>
                     </div>
+                    
+                    <button class="notification-btn" onclick="showNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount">3</span>
+                    </button>
+                    
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    
+                    <div class="user-menu">
+                        <div class="user-avatar" style="width: 35px; height: 35px; font-size: 16px;">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div>
+                            <h4 id="topUserName" style="font-size: 14px; margin: 0;">د. أحمد محمد</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- الإجراءات السريعة -->
+            <div class="quick-actions">
+                <div class="action-card" onclick="openAddBookingModal()">
+                    <div class="action-icon" style="background: var(--primary);">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>إضافة حجز جديد</h3>
+                        <p>إضافة موعد مريض جديد</p>
+                    </div>
+                </div>
+                
+                <div class="action-card" onclick="window.open('booking.html', '_blank')">
+                    <div class="action-icon" style="background: var(--secondary);">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>صفحة الحجز</h3>
+                        <p>عرض صفحة حجز المرضى</p>
+                    </div>
+                </div>
+                
+                <div class="action-card" onclick="location.href='#calendar'">
+                    <div class="action-icon" style="background: var(--accent);">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>تقويم اليوم</h3>
+                        <p>عرض مواعيد اليوم</p>
+                    </div>
+                </div>
+                
+                <div class="action-card" onclick="printReport()">
+                    <div class="action-icon" style="background: var(--success);">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <div class="action-info">
+                        <h3>طباعة تقرير</h3>
+                        <p>طباعة تقرير الحجوزات</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- الإحصائيات -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary);">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="todayBookings">0</h3>
+                        <p>حجوزات اليوم</p>
+                        <span class="stat-trend trend-up" id="todayTrend">+0 عن الأمس</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success);">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalPatients">0</h3>
+                        <p>إجمالي المرضى</p>
+                        <span class="stat-trend trend-up" id="patientsTrend">+0 هذا الشهر</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="pendingBookings">0</h3>
+                        <p>في الانتظار</p>
+                        <span class="stat-trend trend-down" id="pendingTrend">-0 عن الأمس</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--info);">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="todayRevenue">0</h3>
+                        <p>ريال إيرادات اليوم</p>
+                        <span class="stat-trend trend-up" id="revenueTrend">+0 عن الأمس</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- جدول الحجوزات القادمة -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-day"></i> الحجوزات القادمة اليوم</h2>
                     <div>
-                        <h4 style="font-size: 14px; margin: 0;">د. أحمد محمد</h4>
+                        <button class="btn btn-primary" onclick="openAddBookingModal()">
+                            <i class="fas fa-plus"></i> إضافة حجز جديد
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> تحديث
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الحجز</th>
+                                <th>اسم المريض</th>
+                                <th>الهاتف</th>
+                                <th>الطبيب</th>
+                                <th>الوقت</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todayBookingsTable">
+                            <!-- سيتم تعبئة البيانات تلقائياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- تقويم الحجوزات -->
+            <div class="section" id="calendar">
+                <div class="section-header">
+                    <h2><i class="fas fa-calendar-alt"></i> تقويم الحجوزات</h2>
+                    <div class="calendar-header">
+                        <button class="btn btn-secondary" onclick="changeMonth(-1)">
+                            <i class="fas fa-chevron-right"></i> الشهر السابق
+                        </button>
+                        <h3 id="currentMonth">يناير 2024</h3>
+                        <button class="btn btn-secondary" onclick="changeMonth(1)">
+                            الشهر التالي <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="calendar-container">
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- سيتم تعبئة التقويم تلقائياً -->
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- الإجراءات السريعة -->
-        <div class="quick-actions">
-            <div class="action-card" onclick="openAddBookingModal()">
-                <div class="action-icon" style="background: var(--primary);">
-                    <i class="fas fa-plus-circle"></i>
-                </div>
-                <div class="action-info">
-                    <h3>إضافة حجز جديد</h3>
-                    <p>إضافة موعد مريض جديد</p>
-                </div>
-            </div>
             
-            <div class="action-card" onclick="window.open('booking.html', '_blank')">
-                <div class="action-icon" style="background: var(--secondary);">
-                    <i class="fas fa-external-link-alt"></i>
-                </div>
-                <div class="action-info">
-                    <h3>صفحة الحجز</h3>
-                    <p>عرض صفحة حجز المرضى</p>
-                </div>
-            </div>
-            
-            <div class="action-card" onclick="location.href='#calendar'">
-                <div class="action-icon" style="background: var(--accent);">
-                    <i class="fas fa-calendar-day"></i>
-                </div>
-                <div class="action-info">
-                    <h3>تقويم اليوم</h3>
-                    <p>عرض مواعيد اليوم</p>
-                </div>
-            </div>
-            
-            <div class="action-card" onclick="printReport()">
-                <div class="action-icon" style="background: var(--success);">
-                    <i class="fas fa-print"></i>
-                </div>
-                <div class="action-info">
-                    <h3>طباعة تقرير</h3>
-                    <p>طباعة تقرير الحجوزات</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- الإحصائيات -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--primary);">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="todayBookings">12</h3>
-                    <p>حجوزات اليوم</p>
-                    <span class="stat-trend trend-up">+2 عن الأمس</span>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--success);">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="totalPatients">85</h3>
-                    <p>إجمالي المرضى</p>
-                    <span class="stat-trend trend-up">+10 هذا الشهر</span>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--warning);">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="pendingBookings">3</h3>
-                    <p>في الانتظار</p>
-                    <span class="stat-trend trend-down">-1 عن الأمس</span>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon" style="background: var(--info);">
-                    <i class="fas fa-money-bill-wave"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="todayRevenue">2,400</h3>
-                    <p>ريال إيرادات اليوم</p>
-                    <span class="stat-trend trend-up">+300 عن الأمس</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- جدول الحجوزات القادمة -->
-        <div class="section">
-            <div class="section-header">
-                <h2><i class="fas fa-calendar-day"></i> الحجوزات القادمة اليوم</h2>
-                <div>
-                    <button class="btn btn-primary" onclick="openAddBookingModal()">
-                        <i class="fas fa-plus"></i> إضافة حجز جديد
-                    </button>
-                    <button class="btn btn-secondary">
-                        <i class="fas fa-sync-alt"></i> تحديث
+            <!-- الحجوزات الأخيرة -->
+            <div class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-history"></i> الحجوزات الأخيرة</h2>
+                    <button class="btn btn-secondary" onclick="loadMoreBookings()">
+                        <i class="fas fa-redo"></i> تحميل المزيد
                     </button>
                 </div>
-            </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>رقم الحجز</th>
-                            <th>اسم المريض</th>
-                            <th>الهاتف</th>
-                            <th>الطبيب</th>
-                            <th>الوقت</th>
-                            <th>الحالة</th>
-                            <th>الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="todayBookingsTable">
-                        <!-- سيتم تعبئة البيانات تلقائياً -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- تقويم الحجوزات -->
-        <div class="section" id="calendar">
-            <div class="section-header">
-                <h2><i class="fas fa-calendar-alt"></i> تقويم الحجوزات</h2>
-                <div class="calendar-header">
-                    <button class="btn btn-secondary" onclick="prevMonth()">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <h3 id="currentMonth">يناير 2024</h3>
-                    <button class="btn btn-secondary" onclick="nextMonth()">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>اسم المريض</th>
+                                <th>الطبيب</th>
+                                <th>الوقت</th>
+                                <th>الحالة</th>
+                                <th>التفاصيل</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentBookingsTable">
+                            <!-- سيتم تعبئة البيانات تلقائياً -->
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            
-            <div class="calendar-container">
-                <div class="calendar-grid" id="calendarGrid">
-                    <!-- سيتم تعبئة التقويم تلقائياً -->
-                </div>
-            </div>
-        </div>
-        
-        <!-- الحجوزات الأخيرة -->
-        <div class="section">
-            <div class="section-header">
-                <h2><i class="fas fa-history"></i> الحجوزات الأخيرة</h2>
-                <button class="btn btn-secondary" onclick="loadMoreBookings()">
-                    <i class="fas fa-redo"></i> تحميل المزيد
-                </button>
-            </div>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>التاريخ</th>
-                            <th>اسم المريض</th>
-                            <th>الطبيب</th>
-                            <th>الوقت</th>
-                            <th>الحالة</th>
-                            <th>التفاصيل</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentBookingsTable">
-                        <!-- سيتم تعبئة البيانات تلقائياً -->
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -1002,9 +1063,7 @@
                         </label>
                         <select id="newBookingDoctor" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
                             <option value="">-- اختر الطبيب --</option>
-                            <option value="د. أحمد محمد - أسنان">د. أحمد محمد - أسنان</option>
-                            <option value="د. سارة علي - باطنة">د. سارة علي - باطنة</option>
-                            <option value="د. خالد حسن - عيون">د. خالد حسن - عيون</option>
+                            <!-- سيتم تعبئة الأطباء تلقائياً -->
                         </select>
                     </div>
                     
@@ -1019,7 +1078,10 @@
                             <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
                                 <i class="fas fa-clock"></i> الوقت
                             </label>
-                            <input type="time" id="newBookingTime" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                            <select id="newBookingTime" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                                <option value="">-- اختر الوقت --</option>
+                                <!-- سيتم تعبئة الأوقات تلقائياً -->
+                            </select>
                         </div>
                     </div>
                     
@@ -1042,28 +1104,202 @@
             </div>
         </div>
     </div>
+    
+    <!-- مودال تعديل الحجز -->
+    <div id="editBookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> تعديل الحجز</h3>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editBookingForm">
+                    <input type="hidden" id="editBookingId">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                                <i class="fas fa-user"></i> اسم المريض
+                            </label>
+                            <input type="text" id="editPatientName" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                                <i class="fas fa-phone"></i> رقم الهاتف
+                            </label>
+                            <input type="tel" id="editPatientPhone" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                            <i class="fas fa-user-md"></i> اختر الطبيب
+                        </label>
+                        <select id="editBookingDoctor" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                            <option value="">-- اختر الطبيب --</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                                <i class="fas fa-calendar"></i> التاريخ
+                            </label>
+                            <input type="date" id="editBookingDate" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                                <i class="fas fa-clock"></i> الوقت
+                            </label>
+                            <select id="editBookingTime" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                                <option value="">-- اختر الوقت --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                            <i class="fas fa-flag"></i> حالة الحجز
+                        </label>
+                        <select id="editBookingStatus" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" required>
+                            <option value="pending">في الانتظار</option>
+                            <option value="confirmed">مؤكد</option>
+                            <option value="completed">مكتمل</option>
+                            <option value="cancelled">ملغى</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                            <i class="fas fa-notes-medical"></i> ملاحظات
+                        </label>
+                        <textarea id="editBookingNotes" rows="3" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;"></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-save"></i> حفظ التغييرات
+                        </button>
+                        <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeEditModal()">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script>
         // تهيئة النظام
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
-            loadTodayBookings();
-            loadRecentBookings();
-            generateCalendar();
-            updateDateTime();
+            // التحقق من تسجيل الدخول
+            checkAuthentication();
             
-            // تحديث البيانات كل 30 ثانية
-            setInterval(updateDashboardData, 30000);
+            // تحميل البيانات
+            initializeDashboard();
         });
+        
+        // التحقق من تسجيل الدخول
+        function checkAuthentication() {
+            // استخدام نظام المصادقة إذا كان متاحاً
+            if (typeof ClinicSystem !== 'undefined' && ClinicSystem.isLoggedIn) {
+                if (!ClinicSystem.isLoggedIn()) {
+                    redirectToLogin();
+                    return;
+                }
+                loadUserInfo();
+            } else {
+                // فحص بسيط للـ localStorage
+                const userData = localStorage.getItem('clinic_user');
+                const loggedIn = localStorage.getItem('clinic_logged_in');
+                
+                if (!userData || loggedIn !== 'true') {
+                    redirectToLogin();
+                    return;
+                }
+                loadUserInfo();
+            }
+        }
+        
+        function redirectToLogin() {
+            document.getElementById('authCheck').style.display = 'block';
+            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+        }
+        
+        function loadUserInfo() {
+            try {
+                const userData = JSON.parse(localStorage.getItem('clinic_user') || '{}');
+                const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+                
+                // تحديث اسم المستخدم
+                document.getElementById('userName').textContent = userData.fullName || 'د. أحمد محمد';
+                document.getElementById('topUserName').textContent = userData.fullName || 'د. أحمد محمد';
+                document.getElementById('userRole').textContent = userData.role === 'admin' ? 'مدير النظام' : 'طبيب';
+                
+                // تحديث معلومات العيادة
+                if (settings.clinic) {
+                    document.getElementById('clinicName').textContent = settings.clinic.name || 'عيادة النخبة الطبية';
+                }
+                
+                // تحديث رسالة الترحيب
+                updateWelcomeMessage();
+                
+            } catch (error) {
+                console.error('خطأ في تحميل بيانات المستخدم:', error);
+            }
+        }
+        
+        function updateWelcomeMessage() {
+            const now = new Date();
+            const hour = now.getHours();
+            let greeting = '';
+            
+            if (hour < 12) greeting = 'صباح الخير';
+            else if (hour < 18) greeting = 'مساء الخير';
+            else greeting = 'مساء الخير';
+            
+            const userData = JSON.parse(localStorage.getItem('clinic_user') || '{}');
+            const name = userData.fullName || 'دكتور أحمد';
+            
+            document.getElementById('welcomeMessage').textContent = 
+                `${greeting} ${name.split(' ')[0]}، إليك نظرة عامة على عيادتك`;
+        }
+        
+        // تهيئة لوحة التحكم
+        function initializeDashboard() {
+            // إخفاء شاشة التحميل بعد تأخير بسيط
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('contentArea').style.display = 'block';
+                
+                // تحميل البيانات
+                loadDashboardData();
+                loadTodayBookings();
+                loadRecentBookings();
+                generateCalendar();
+                updateDateTime();
+                
+                // تحديث البيانات كل دقيقة
+                setInterval(updateDashboardData, 60000);
+                
+            }, 1000);
+        }
         
         // تحميل بيانات لوحة التحكم
         function loadDashboardData() {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             const today = new Date().toISOString().split('T')[0];
             
             // حجوزات اليوم
             const todayBookings = bookings.filter(b => b.date === today).length;
             document.getElementById('todayBookings').textContent = todayBookings;
+            
+            // تحديث البادج
+            document.getElementById('bookingsBadge').textContent = todayBookings;
             
             // إجمالي المرضى (أرقام فريدة)
             const uniquePatients = [...new Set(bookings.map(b => b.phone))].length;
@@ -1073,11 +1309,30 @@
             const pendingBookings = bookings.filter(b => b.status === 'pending').length;
             document.getElementById('pendingBookings').textContent = pendingBookings;
             
-            // الإيرادات (محاكاة)
+            // الإيرادات
             const todayRevenue = bookings
                 .filter(b => b.date === today && b.status === 'confirmed')
                 .length * 200; // 200 ريال لكل حجز
             document.getElementById('todayRevenue').textContent = todayRevenue.toLocaleString();
+            
+            // تحديث التوجهات (محاكاة)
+            updateTrends();
+        }
+        
+        function updateTrends() {
+            // محاكاة البيانات التاريخية
+            const yesterdayBookings = Math.floor(Math.random() * 5) + 8;
+            const todayBookings = parseInt(document.getElementById('todayBookings').textContent);
+            const diff = todayBookings - yesterdayBookings;
+            
+            document.getElementById('todayTrend').textContent = 
+                diff >= 0 ? `+${diff} عن الأمس` : `${diff} عن الأمس`;
+            
+            if (diff >= 0) {
+                document.getElementById('todayTrend').className = 'stat-trend trend-up';
+            } else {
+                document.getElementById('todayTrend').className = 'stat-trend trend-down';
+            }
         }
         
         // تحديث البيانات
@@ -1085,11 +1340,39 @@
             loadDashboardData();
             loadTodayBookings();
             generateCalendar();
+            updateDateTime();
+        }
+        
+        function refreshData() {
+            document.getElementById('loadingScreen').style.display = 'block';
+            document.getElementById('contentArea').style.display = 'none';
+            
+            setTimeout(() => {
+                loadDashboardData();
+                loadTodayBookings();
+                loadRecentBookings();
+                generateCalendar();
+                
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('contentArea').style.display = 'block';
+                
+                showMessage('success', 'تم التحديث', 'تم تحديث البيانات بنجاح');
+            }, 1000);
+        }
+        
+        // تحميل الحجوزات
+        function getBookings() {
+            try {
+                return JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            } catch (error) {
+                console.error('خطأ في قراءة الحجوزات:', error);
+                return [];
+            }
         }
         
         // تحميل حجوزات اليوم
         function loadTodayBookings() {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             const today = new Date().toISOString().split('T')[0];
             
             const todayBookings = bookings
@@ -1099,10 +1382,23 @@
             const tableBody = document.getElementById('todayBookingsTable');
             tableBody.innerHTML = '';
             
+            if (todayBookings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-calendar-times"></i>
+                            <br>
+                            لا توجد حجوزات لهذا اليوم
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
             todayBookings.forEach(booking => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>${booking.id}</strong></td>
+                    <td><strong>${booking.id || 'غير معروف'}</strong></td>
                     <td>${booking.name}</td>
                     <td>${booking.phone}</td>
                     <td>${booking.doctor}</td>
@@ -1127,38 +1423,39 @@
                 `;
                 tableBody.appendChild(row);
             });
-            
-            // إذا لم يكن هناك حجوزات
-            if (todayBookings.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-light);">
-                            <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px; color: #ddd;"></i>
-                            <br>
-                            لا توجد حجوزات لهذا اليوم
-                        </td>
-                    </tr>
-                `;
-            }
         }
         
         // تحميل الحجوزات الأخيرة
         function loadRecentBookings() {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             
             // أخذ آخر 10 حجوزات
             const recentBookings = bookings
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
                 .slice(0, 10);
             
             const tableBody = document.getElementById('recentBookingsTable');
             tableBody.innerHTML = '';
+            
+            if (recentBookings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="no-data">
+                            <i class="fas fa-history"></i>
+                            <br>
+                            لا توجد حجوزات سابقة
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
             
             recentBookings.forEach(booking => {
                 const row = document.createElement('tr');
                 const date = new Date(booking.date);
                 const formattedDate = date.toLocaleDateString('ar-EG', {
                     weekday: 'short',
+                    year: 'numeric',
                     month: 'short',
                     day: 'numeric'
                 });
@@ -1182,8 +1479,14 @@
         // توليد التقويم
         function generateCalendar() {
             const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+            currentMonth = now.getMonth();
+            currentYear = now.getFullYear();
+            
+            // استخدام الشهر المحفوظ إذا كان موجوداً
+            if (window.calendarMonth !== undefined) {
+                currentMonth = window.calendarMonth;
+                currentYear = window.calendarYear;
+            }
             
             // تحديث عنوان الشهر
             const monthNames = [
@@ -1222,7 +1525,7 @@
             }
             
             // تحميل الحجوزات للتحقق
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             
             // إضافة أيام الشهر
             for (let day = 1; day <= daysInMonth; day++) {
@@ -1232,7 +1535,10 @@
                 dateDiv.dataset.date = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 // التحقق إذا كان اليوم الحالي
-                if (day === now.getDate() && currentMonth === now.getMonth() && currentYear === now.getFullYear()) {
+                const today = new Date();
+                if (day === today.getDate() && 
+                    currentMonth === today.getMonth() && 
+                    currentYear === today.getFullYear()) {
                     dateDiv.classList.add('today');
                 }
                 
@@ -1254,22 +1560,25 @@
             }
         }
         
-        // عرض حجوزات يوم معين
-        function showDayBookings(dateStr) {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
-            const dayBookings = bookings.filter(b => b.date === dateStr);
-            
-            if (dayBookings.length === 0) {
-                alert(`لا توجد حجوزات في ${new Date(dateStr).toLocaleDateString('ar-EG')}`);
-                return;
+        // تغيير الشهر
+        function changeMonth(delta) {
+            if (!window.calendarMonth) {
+                const now = new Date();
+                window.calendarMonth = now.getMonth();
+                window.calendarYear = now.getFullYear();
             }
             
-            let message = `📅 حجوزات ${new Date(dateStr).toLocaleDateString('ar-EG')}:\n\n`;
-            dayBookings.forEach(booking => {
-                message += `👤 ${booking.name}\n⏰ ${booking.time}\n👨‍⚕️ ${booking.doctor}\n📞 ${booking.phone}\n────────────\n`;
-            });
+            window.calendarMonth += delta;
             
-            alert(message);
+            if (window.calendarMonth < 0) {
+                window.calendarMonth = 11;
+                window.calendarYear--;
+            } else if (window.calendarMonth > 11) {
+                window.calendarMonth = 0;
+                window.calendarYear++;
+            }
+            
+            generateCalendar();
         }
         
         // دوال مساعدة
@@ -1295,23 +1604,23 @@
             };
             
             const dateTimeStr = now.toLocaleDateString('ar-EG', options);
-            document.querySelector('.page-title p').textContent = 
-                `مرحباً دكتور أحمد، اليوم ${dateTimeStr}`;
+            updateWelcomeMessage();
         }
         
         // إدارة الحجوزات
         function confirmBooking(bookingId) {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             const bookingIndex = bookings.findIndex(b => b.id === bookingId);
             
             if (bookingIndex > -1) {
                 bookings[bookingIndex].status = 'confirmed';
+                bookings[bookingIndex].updatedAt = new Date().toISOString();
                 localStorage.setItem('clinic_bookings', JSON.stringify(bookings));
                 
-                // إرسال إشعار واتساب (محاكاة)
+                // إرسال إشعار واتساب
                 sendWhatsAppNotification(bookings[bookingIndex], 'confirm');
                 
-                alert('تم تأكيد الحجز وإرسال إشعار للمريض');
+                showMessage('success', 'تم التأكيد', 'تم تأكيد الحجز وإرسال إشعار للمريض');
                 loadTodayBookings();
                 loadDashboardData();
             }
@@ -1319,25 +1628,81 @@
         
         function cancelBooking(bookingId) {
             if (confirm('هل تريد إلغاء هذا الحجز؟')) {
-                const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+                const bookings = getBookings();
                 const bookingIndex = bookings.findIndex(b => b.id === bookingId);
                 
                 if (bookingIndex > -1) {
                     bookings[bookingIndex].status = 'cancelled';
+                    bookings[bookingIndex].updatedAt = new Date().toISOString();
                     localStorage.setItem('clinic_bookings', JSON.stringify(bookings));
                     
-                    // إرسال إشعار واتساب (محاكاة)
+                    // إرسال إشعار واتساب
                     sendWhatsAppNotification(bookings[bookingIndex], 'cancel');
                     
-                    alert('تم إلغاء الحجز وإرسال إشعار للمريض');
+                    showMessage('success', 'تم الإلغاء', 'تم إلغاء الحجز وإرسال إشعار للمريض');
                     loadTodayBookings();
                     loadDashboardData();
                 }
             }
         }
         
+        function editBooking(bookingId) {
+            const bookings = getBookings();
+            const booking = bookings.find(b => b.id === bookingId);
+            
+            if (!booking) {
+                showMessage('error', 'خطأ', 'الحجز غير موجود');
+                return;
+            }
+            
+            // تعبئة النموذج
+            document.getElementById('editBookingId').value = booking.id;
+            document.getElementById('editPatientName').value = booking.name;
+            document.getElementById('editPatientPhone').value = booking.phone;
+            document.getElementById('editBookingDate').value = booking.date;
+            document.getElementById('editBookingNotes').value = booking.notes || '';
+            document.getElementById('editBookingStatus').value = booking.status;
+            
+            // تحميل قائمة الأطباء
+            loadDoctorsList('editBookingDoctor', booking.doctor);
+            
+            // تحميل الأوقات المتاحة
+            loadAvailableTimes('editBookingTime', booking.date, booking.time);
+            
+            // فتح المودال
+            document.getElementById('editBookingModal').style.display = 'flex';
+        }
+        
+        function viewBookingDetails(bookingId) {
+            const bookings = getBookings();
+            const booking = bookings.find(b => b.id === bookingId);
+            
+            if (!booking) {
+                showMessage('error', 'خطأ', 'الحجز غير موجود');
+                return;
+            }
+            
+            const details = `
+                📋 تفاصيل الحجز
+                ──────────────
+                🔢 رقم الحجز: ${booking.id}
+                👤 المريض: ${booking.name}
+                📞 الهاتف: ${booking.phone}
+                👨‍⚕️ الطبيب: ${booking.doctor}
+                📅 التاريخ: ${new Date(booking.date).toLocaleDateString('ar-EG')}
+                ⏰ الوقت: ${booking.time}
+                🏷️ الحالة: ${getStatusText(booking.status)}
+                📝 الملاحظات: ${booking.notes || 'لا توجد'}
+                ──────────────
+                📅 تم الإنشاء: ${new Date(booking.createdAt).toLocaleDateString('ar-EG')}
+                ${booking.updatedAt ? `🔄 تم التحديث: ${new Date(booking.updatedAt).toLocaleDateString('ar-EG')}` : ''}
+            `;
+            
+            alert(details);
+        }
+        
         function whatsappPatient(bookingId) {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             const booking = bookings.find(b => b.id === bookingId);
             
             if (booking) {
@@ -1353,12 +1718,9 @@
 
 شكراً لثقتك بنا ❤️`;
                 
-                // في النظام الحقيقي:
-                // const whatsappUrl = `https://wa.me/${booking.phone}?text=${encodeURIComponent(message)}`;
-                // window.open(whatsappUrl, '_blank');
-                
-                // للمحاكاة:
-                alert('📱 محاكاة إشعار واتساب:\n\n' + message);
+                // محاكاة إرسال واتساب
+                showMessage('info', 'محاكاة واتساب', 'تم إعداد رسالة واتساب للمريض');
+                console.log('رسالة واتساب:', message);
             }
         }
         
@@ -1379,8 +1741,91 @@
 📞 للاستفسار: 0112345678`;
             }
             
-            console.log('📲 إشعار واتساب:', message);
-            // في النظام الحقيقي، نرسل إشعار فعلي
+            console.log('إشعار واتساب:', message);
+        }
+        
+        // تحميل قائمة الأطباء
+        function loadDoctorsList(selectId, selectedValue = '') {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">-- اختر الطبيب --</option>';
+            
+            // محاولة تحميل من الإعدادات
+            try {
+                const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+                const doctors = settings.doctors || [
+                    { id: 'DR001', name: 'د. أحمد محمد', specialty: 'أسنان' },
+                    { id: 'DR002', name: 'د. سارة علي', specialty: 'باطنة' },
+                    { id: 'DR003', name: 'د. خالد حسن', specialty: 'عيون' }
+                ];
+                
+                doctors.forEach(doctor => {
+                    if (doctor.active !== false) {
+                        const option = document.createElement('option');
+                        const displayName = `${doctor.name} - ${doctor.specialty}`;
+                        option.value = displayName;
+                        option.textContent = displayName;
+                        if (displayName === selectedValue) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    }
+                });
+            } catch (error) {
+                console.error('خطأ في تحميل قائمة الأطباء:', error);
+                // قائمة افتراضية
+                const defaultDoctors = [
+                    'د. أحمد محمد - أسنان',
+                    'د. سارة علي - باطنة',
+                    'د. خالد حسن - عيون',
+                    'د. فاطمة عبدالله - جلدية'
+                ];
+                
+                defaultDoctors.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor;
+                    option.textContent = doctor;
+                    if (doctor === selectedValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        // تحميل الأوقات المتاحة
+        function loadAvailableTimes(selectId, date, selectedTime = '') {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">-- اختر الوقت --</option>';
+            
+            const timeSlots = [
+                '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+                '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
+                '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+                '17:00', '17:30', '18:00'
+            ];
+            
+            // تحميل الحجوزات للتحقق من الأوقات المحجوزة
+            const bookings = getBookings();
+            const bookedTimes = bookings
+                .filter(b => b.date === date && b.status !== 'cancelled')
+                .map(b => b.time);
+            
+            timeSlots.forEach(time => {
+                const option = document.createElement('option');
+                option.value = time;
+                option.textContent = time;
+                
+                if (bookedTimes.includes(time) && time !== selectedTime) {
+                    option.disabled = true;
+                    option.textContent += ' (محجوز)';
+                }
+                
+                if (time === selectedTime) {
+                    option.selected = true;
+                }
+                
+                select.appendChild(option);
+            });
         }
         
         // المودال
@@ -1391,17 +1836,26 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('newBookingDate').value = today;
             
-            // تعيين وقت بعد ساعة كافتراضي
-            const nextHour = new Date();
-            nextHour.setHours(nextHour.getHours() + 1);
-            nextHour.setMinutes(0);
-            document.getElementById('newBookingTime').value = 
-                `${String(nextHour.getHours()).padStart(2, '0')}:00`;
+            // تحميل قائمة الأطباء
+            loadDoctorsList('newBookingDoctor');
+            
+            // تحميل الأوقات المتاحة
+            loadAvailableTimes('newBookingTime', today);
+            
+            // تحديث الأوقات عند تغيير التاريخ
+            document.getElementById('newBookingDate').addEventListener('change', function() {
+                loadAvailableTimes('newBookingTime', this.value);
+            });
         }
         
         function closeModal() {
             document.getElementById('addBookingModal').style.display = 'none';
             document.getElementById('addBookingForm').reset();
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editBookingModal').style.display = 'none';
+            document.getElementById('editBookingForm').reset();
         }
         
         // معالجة نموذج إضافة حجز جديد
@@ -1417,11 +1871,18 @@
                 time: document.getElementById('newBookingTime').value,
                 notes: document.getElementById('newBookingNotes').value,
                 status: 'confirmed',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             };
             
+            // التحقق من صحة البيانات
+            if (!newBooking.name || !newBooking.phone || !newBooking.doctor || !newBooking.date || !newBooking.time) {
+                showMessage('error', 'خطأ', 'يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+            
             // حفظ في localStorage
-            let bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            let bookings = getBookings();
             bookings.push(newBooking);
             localStorage.setItem('clinic_bookings', JSON.stringify(bookings));
             
@@ -1435,23 +1896,138 @@
             loadDashboardData();
             generateCalendar();
             
-            alert('✅ تم إضافة الحجز بنجاح وإرسال تأكيد للمريض');
+            showMessage('success', 'تم الإضافة', '✅ تم إضافة الحجز بنجاح وإرسال تأكيد للمريض');
         });
         
-        // التنقل بين الأشهر
-        function prevMonth() {
-            // محاكاة (في النظام الحقيقي، نقوم بتغيير الشهر)
-            alert('الانتقال للشهر السابق');
+        // معالجة نموذج تعديل الحجز
+        document.getElementById('editBookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const bookingId = document.getElementById('editBookingId').value;
+            const updates = {
+                name: document.getElementById('editPatientName').value,
+                phone: document.getElementById('editPatientPhone').value,
+                doctor: document.getElementById('editBookingDoctor').value,
+                date: document.getElementById('editBookingDate').value,
+                time: document.getElementById('editBookingTime').value,
+                status: document.getElementById('editBookingStatus').value,
+                notes: document.getElementById('editBookingNotes').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // التحقق من صحة البيانات
+            if (!updates.name || !updates.phone || !updates.doctor || !updates.date || !updates.time) {
+                showMessage('error', 'خطأ', 'يرجى ملء جميع الحقول المطلوبة');
+                return;
+            }
+            
+            // تحديث الحجز
+            let bookings = getBookings();
+            const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+            
+            if (bookingIndex > -1) {
+                bookings[bookingIndex] = { ...bookings[bookingIndex], ...updates };
+                localStorage.setItem('clinic_bookings', JSON.stringify(bookings));
+                
+                // إغلاق المودال وتحديث البيانات
+                closeEditModal();
+                loadTodayBookings();
+                loadRecentBookings();
+                loadDashboardData();
+                generateCalendar();
+                
+                showMessage('success', 'تم التحديث', '✅ تم تحديث الحجز بنجاح');
+            } else {
+                showMessage('error', 'خطأ', 'الحجز غير موجود');
+            }
+        });
+        
+        // تحديث الأوقات عند تغيير التاريخ في نموذج التعديل
+        document.getElementById('editBookingDate').addEventListener('change', function() {
+            loadAvailableTimes('editBookingTime', this.value, document.getElementById('editBookingTime').value);
+        });
+        
+        // البحث
+        function searchBookings() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const bookings = getBookings();
+            
+            if (!searchTerm) {
+                loadTodayBookings();
+                return;
+            }
+            
+            const filteredBookings = bookings.filter(booking => 
+                booking.name.toLowerCase().includes(searchTerm) ||
+                booking.phone.includes(searchTerm) ||
+                booking.id.toLowerCase().includes(searchTerm) ||
+                booking.doctor.toLowerCase().includes(searchTerm)
+            );
+            
+            const tableBody = document.getElementById('todayBookingsTable');
+            tableBody.innerHTML = '';
+            
+            if (filteredBookings.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-search"></i>
+                            <br>
+                            لا توجد نتائج للبحث
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredBookings.slice(0, 20).forEach(booking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${booking.id || 'غير معروف'}</strong></td>
+                    <td>${booking.name}</td>
+                    <td>${booking.phone}</td>
+                    <td>${booking.doctor}</td>
+                    <td>${booking.time}</td>
+                    <td><span class="status-badge status-${booking.status}">${getStatusText(booking.status)}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-success" onclick="confirmBooking('${booking.id}')" title="تأكيد">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="editBooking('${booking.id}')" title="تعديل">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="cancelBooking('${booking.id}')" title="إلغاء">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
         }
         
-        function nextMonth() {
-            // محاكاة
-            alert('الانتقال للشهر التالي');
+        // عرض حجوزات يوم معين
+        function showDayBookings(dateStr) {
+            const bookings = getBookings();
+            const dayBookings = bookings.filter(b => b.date === dateStr);
+            
+            if (dayBookings.length === 0) {
+                showMessage('info', 'لا توجد حجوزات', `لا توجد حجوزات في ${new Date(dateStr).toLocaleDateString('ar-EG')}`);
+                return;
+            }
+            
+            let message = `📅 حجوزات ${new Date(dateStr).toLocaleDateString('ar-EG')}:\n\n`;
+            dayBookings.forEach(booking => {
+                message += `👤 ${booking.name}\n⏰ ${booking.time}\n👨‍⚕️ ${booking.doctor}\n📞 ${booking.phone}\n🏷️ ${getStatusText(booking.status)}\n────────────\n`;
+            });
+            
+            alert(message);
         }
         
         // طباعة التقرير
         function printReport() {
-            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const bookings = getBookings();
             const today = new Date().toISOString().split('T')[0];
             
             const todayBookings = bookings.filter(b => b.date === today);
@@ -1470,13 +2046,63 @@
 👥 قائمة الحجوزات:
 ${todayBookings.map(b => `• ${b.time} - ${b.name} (${b.doctor}) - ${getStatusText(b.status)}`).join('\n')}`;
             
-            alert(report);
+            // فتح نافذة جديدة للطباعة
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html dir="rtl">
+                <head>
+                    <title>تقرير حجوزات اليوم</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #2D5BFF; }
+                        pre { background: #f5f5f5; padding: 20px; border-radius: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>📊 تقرير حجوزات اليوم</h1>
+                    <pre>${report}</pre>
+                    <script>window.print();</script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
         }
         
         // تحميل المزيد
         function loadMoreBookings() {
-            alert('تحميل المزيد من الحجوزات...');
-            // في النظام الحقيقي، نحميل المزيد من السجلات
+            // زيادة عدد الحجوزات المعروضة
+            const currentRows = document.querySelectorAll('#recentBookingsTable tr').length;
+            if (currentRows <= 1) return; // إذا كانت الجدول فارغ أو به رسالة فقط
+            
+            showMessage('info', 'جاري التحميل', 'تحميل المزيد من الحجوزات...');
+            setTimeout(() => {
+                loadRecentBookings();
+            }, 1000);
+        }
+        
+        // الإشعارات
+        function showNotifications() {
+            const notifications = [
+                { id: 1, title: 'حجز جديد', message: 'تم حجز موعد جديد مع د. أحمد محمد', time: 'قبل 5 دقائق' },
+                { id: 2, title: 'تذكير', message: 'لديك 3 حجوزات قادمة اليوم', time: 'قبل ساعة' },
+                { id: 3, title: 'تحديث النظام', message: 'تم تحديث النظام إلى الإصدار 1.0.1', time: 'قبل يوم' }
+            ];
+            
+            let message = '🔔 الإشعارات:\n\n';
+            notifications.forEach(notif => {
+                message += `📌 ${notif.title}\n${notif.message}\n⏰ ${notif.time}\n────────────\n`;
+            });
+            
+            alert(message);
+        }
+        
+        // تسجيل الخروج
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                localStorage.removeItem('clinic_user');
+                localStorage.removeItem('clinic_logged_in');
+                window.location.href = 'index.html';
+            }
         }
         
         // تفعيل/إلغاء الشريط الجانبي على الهواتف
@@ -1492,11 +2118,76 @@ ${todayBookings.map(b => `• ${b.time} - ${b.name} (${b.doctor}) - ${getStatusT
                 
                 if (sidebar.classList.contains('active') && 
                     !sidebar.contains(e.target) && 
-                    !menuToggle.contains(e.target)) {
+                    (!menuToggle || !menuToggle.contains(e.target))) {
                     sidebar.classList.remove('active');
                 }
             }
         });
+        
+        // عرض الرسائل
+        function showMessage(type, title, message) {
+            const messageTypes = {
+                success: { icon: '✅', color: '#28a745' },
+                error: { icon: '❌', color: '#dc3545' },
+                warning: { icon: '⚠️', color: '#ffc107' },
+                info: { icon: 'ℹ️', color: '#17a2b8' }
+            };
+            
+            const config = messageTypes[type] || messageTypes.info;
+            
+            // إنشاء عنصر الرسالة
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+                border-right: 5px solid ${config.color};
+                max-width: 400px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            messageDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="font-size: 24px;">${config.icon}</div>
+                    <div>
+                        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">${title}</div>
+                        <div style="color: #666;">${message}</div>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة أنيميشن
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // إضافة للصفحة
+            document.body.appendChild(messageDiv);
+            
+            // إزالة تلقائية بعد 5 ثوان
+            setTimeout(() => {
+                messageDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 5000);
+        }
     </script>
 </body>
 </html>
