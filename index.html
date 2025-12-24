@@ -1,10 +1,12 @@
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClinicPro - نظام حجز مواعيد العيادات</title>
+    <title>نظام حجز مواعيد العيادات - ClinicPro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="setup.js"></script>
     <style>
         :root {
             --primary: #2D5BFF;
@@ -70,6 +72,7 @@
         .nav-links {
             display: flex;
             gap: 30px;
+            align-items: center;
         }
         
         .nav-links a {
@@ -122,6 +125,7 @@
             display: flex;
             gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -131,6 +135,11 @@
             font-weight: 600;
             font-size: 18px;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border: none;
         }
         
         .btn-primary {
@@ -142,6 +151,11 @@
             background: transparent;
             color: white;
             border: 2px solid white;
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
         }
         
         .btn:hover {
@@ -212,6 +226,90 @@
             color: var(--dark);
             margin-bottom: 15px;
             font-size: 22px;
+        }
+        
+        /* تسجيل الدخول */
+        .login-section {
+            padding: 100px 5%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            color: #333;
+        }
+        
+        .login-container h2 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .login-form .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+        
+        .login-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .login-form input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(45, 91, 255, 0.1);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .login-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .login-links a {
+            color: var(--primary);
+            text-decoration: none;
         }
         
         /* باقات الأسعار */
@@ -328,10 +426,12 @@
             animation: fadeIn 0.8s ease forwards;
         }
         
+        /* متجاوبية */
         @media (max-width: 768px) {
             .navbar {
                 flex-direction: column;
                 gap: 20px;
+                position: relative;
             }
             
             .hero h1 {
@@ -345,6 +445,44 @@
             .pricing-card.popular {
                 transform: none;
             }
+            
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+        
+        /* حالة تسجيل الدخول */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .logout-btn {
+            background: var(--accent);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .logged-in-section {
+            display: none;
+            text-align: center;
+            padding: 100px 5%;
         }
     </style>
 </head>
@@ -360,207 +498,217 @@
             </div>
         </div>
         
-        <div class="nav-links">
-            <a href="#features">المميزات</a>
-            <a href="#how-it-works">كيف يعمل</a>
-            <a href="#pricing">الأسعار</a>
-            <a href="#contact">تواصل معنا</a>
+        <div class="nav-links" id="navLinks">
+            <!-- سيتم تعبئته بواسطة الجافاسكريبت -->
         </div>
-        
-        <a href="demo.html" class="nav-cta">
-            <i class="fas fa-play-circle"></i> جرب النظام
-        </a>
     </nav>
     
-    <!-- قسم الهيرو -->
-    <section class="hero">
-        <div class="hero-content animate">
-            <h1>حوّل عيادتك إلى نظام رقمي متكامل</h1>
-            <p>نظام حجز مواعيد ذكي وإدارة كاملة للعيادات الطبية. سهل الاستخدام، فعال، وبسعر مناسب لكل عيادة</p>
-            <div class="hero-btns">
-                <a href="demo.html" class="btn btn-primary">
-                    <i class="fas fa-rocket"></i> جرب النظام مجاناً
-                </a>
-                <a href="#pricing" class="btn btn-secondary">
-                    <i class="fas fa-tags"></i> اشترك الآن
-                </a>
+    <!-- المحتوى الرئيسي -->
+    <main>
+        <!-- قسم الهيرو -->
+        <section class="hero" id="hero">
+            <div class="hero-content animate">
+                <h1>نظام إدارة وحجز مواعيد العيادات الطبية</h1>
+                <p>الحل المتكامل لإدارة عيادتك الطبية بكفاءة واحترافية. وفر وقتك وحسن تجربة مرضاك بنظام حجز مواعيد ذكي.</p>
+                <div class="hero-btns" id="heroButtons">
+                    <!-- سيتم تعبئته بواسطة الجافاسكريبت -->
+                </div>
             </div>
-        </div>
-    </section>
-    
-    <!-- الميزات -->
-    <section id="features" class="features">
-        <div class="section-title animate">
-            <h2>🎯 مميزات النظام</h2>
-            <p>كل ما تحتاجه لإدارة عيادتك بكفاءة واحترافية</p>
-        </div>
+        </section>
         
-        <div class="features-grid">
-            <div class="feature-card animate">
-                <div class="feature-icon">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <h3>حجز مواعيد ذكي</h3>
-                <p>حجز مواعيد في دقائق، مع منع التعارضات التلقائية وإشعارات تذكير للمرضى</p>
+        <!-- قسم المميزات -->
+        <section id="features" class="features">
+            <div class="section-title animate">
+                <h2>🎯 مميزات النظام</h2>
+                <p>كل ما تحتاجه لإدارة عيادتك بكفاءة واحترافية</p>
             </div>
             
-            <div class="feature-card animate">
-                <div class="feature-icon">
-                    <i class="fas fa-tachometer-alt"></i>
+            <div class="features-grid">
+                <div class="feature-card animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>حجز مواعيد ذكي</h3>
+                    <p>حجز مواعيد في دقائق، مع منع التعارضات التلقائية وإشعارات تذكير للمرضى</p>
                 </div>
-                <h3>لوحة تحكم متكاملة</h3>
-                <p>إدارة كل شيء من مكان واحد: حجوزات، أطباء، تقارير، وإحصاءات</p>
-            </div>
-            
-            <div class="feature-card animate">
-                <div class="feature-icon">
-                    <i class="fab fa-whatsapp"></i>
+                
+                <div class="feature-card animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>لوحة تحكم متكاملة</h3>
+                    <p>إدارة كل شيء من مكان واحد: حجوزات، أطباء، تقارير، وإحصاءات</p>
                 </div>
-                <h3>إشعارات واتساب</h3>
-                <p>إرسال تأكيدات الحجز والتذكيرات تلقائياً عبر واتساب للمرضى</p>
-            </div>
-            
-            <div class="feature-card animate">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
+                
+                <div class="feature-card animate">
+                    <div class="feature-icon">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3>إشعارات واتساب</h3>
+                    <p>إرسال تأكيدات الحجز والتذكيرات تلقائياً عبر واتساب للمرضى</p>
                 </div>
-                <h3>تقارير وتحليلات</h3>
-                <p>تقارير مفصلة عن أداء العيادة، الإيرادات، وأوقات الذروة</p>
-            </div>
-            
-            <div class="feature-card animate">
-                <div class="feature-icon">
-                    <i class="fas fa-mobile-alt"></i>
+                
+                <div class="feature-card animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>تقارير وتحليلات</h3>
+                    <p>تقارير مفصلة عن أداء العيادة، الإيرادات، وأوقات الذروة</p>
                 </div>
-                <h3>يعمل على كل الأجهزة</h3>
-                <p>نظام متجاوب يعمل على الحواسيب، الأجهزة اللوحية، والهواتف الذكية</p>
-            </div>
-            
-            <div class="feature-card animate">
-                <div class="feature-icon">
-                    <i class="fas fa-headset"></i>
+                
+                <div class="feature-card animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>يعمل على كل الأجهزة</h3>
+                    <p>نظام متجاوب يعمل على الحواسيب، الأجهزة اللوحية، والهواتف الذكية</p>
                 </div>
-                <h3>دعم فني متكامل</h3>
-                <p>دعم فني على مدار الساعة لمساعدتك في أي مشكلة تواجهك</p>
+                
+                <div class="feature-card animate">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>دعم فني متكامل</h3>
+                    <p>دعم فني على مدار الساعة لمساعدتك في أي مشكلة تواجهك</p>
+                </div>
             </div>
-        </div>
-    </section>
-    
-    <!-- كيف يعمل النظام -->
-    <section id="how-it-works" class="features" style="background: #f8f9fa;">
-        <div class="section-title animate">
-            <h2>⚙️ كيف يعمل النظام؟</h2>
-            <p>4 خطوات بسيطة لتحويل عيادتك إلى النظام الرقمي</p>
-        </div>
+        </section>
         
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon" style="background: var(--secondary); color: white;">
-                    <i class="fas fa-1"></i>
+        <!-- قسم تسجيل الدخول (يظهر فقط عند عدم تسجيل الدخول) -->
+        <section id="loginSection" class="login-section">
+            <div class="login-container animate">
+                <h2><i class="fas fa-sign-in-alt"></i> تسجيل الدخول للإدارة</h2>
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="username">اسم المستخدم</label>
+                        <input type="text" id="username" name="username" placeholder="أدخل اسم المستخدم" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">كلمة المرور</label>
+                        <input type="password" id="password" name="password" placeholder="أدخل كلمة المرور" required>
+                    </div>
+                    
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </button>
+                </form>
+                
+                <div class="login-links">
+                    <p>لا تملك حساب؟ <a href="#" onclick="showDemo()">جرب النظام أولاً</a></p>
+                    <p>نسيت كلمة المرور؟ <a href="#" onclick="resetPassword()">إعادة تعيين</a></p>
                 </div>
-                <h3>طلب النظام</h3>
-                <p>تختار الباقة المناسبة وتدفع 50$ مرة واحدة</p>
             </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon" style="background: var(--primary); color: white;">
-                    <i class="fas fa-2"></i>
-                </div>
-                <h3>التخصيص</h3>
-                <p>نقوم بتخصيص النظام باسم عيادتك وأطبائك خلال 24 ساعة</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon" style="background: var(--accent); color: white;">
-                    <i class="fas fa-3"></i>
-                </div>
-                <h3>التسليم</h3>
-                <p>نرسل لك روابط النظام وجلسة تدريب لمدة 30 دقيقة</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon" style="background: var(--dark); color: white;">
-                    <i class="fas fa-4"></i>
-                </div>
-                <h3>الدعم</h3>
-                <p>دعم فني لمدة شهر كامل لضمان نجاح النظام في عيادتك</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- باقات الأسعار -->
-    <section id="pricing" class="pricing">
-        <div class="section-title animate">
-            <h2>💰 باقات الأسعار</h2>
-            <p>اختر الباقة المناسبة لعيادتك. جميع الباقات تشمل دعم فني لمدة شهر</p>
-        </div>
+        </section>
         
-        <div class="pricing-cards">
-            <!-- الباقة الأساسية -->
-            <div class="pricing-card animate">
-                <h3 class="plan-name">الباقة الأساسية</h3>
-                <div class="plan-price">50$</div>
-                <p>مرة واحدة فقط</p>
-                
-                <ul style="list-style: none; padding: 20px 0; text-align: right; line-height: 2;">
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> صفحة حجز مواعيد</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> لوحة تحكم أساسية</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> إشعارات واتساب</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> دعم فني شهر</li>
-                    <li><i class="fas fa-times" style="color: var(--accent);"></i> تقارير متقدمة</li>
-                    <li><i class="fas fa-times" style="color: var(--accent);"></i> إشعارات SMS</li>
-                </ul>
-                
-                <a href="demo.html#trialForm" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">
-                    <i class="fas fa-shopping-cart"></i> اطلب الآن
-                </a>
+        <!-- قسم للمستخدمين المسجلين (يظهر فقط عند تسجيل الدخول) -->
+        <section id="loggedInSection" class="logged-in-section">
+            <div class="section-title">
+                <h2>مرحباً بك في نظام ClinicPro</h2>
+                <p>يمكنك الآن الوصول إلى جميع ميزات النظام</p>
             </div>
             
-            <!-- الباقة الأكثر شعبية -->
-            <div class="pricing-card popular animate">
-                <div class="popular-badge">الأكثر طلباً</div>
-                <h3 class="plan-name">الباقة المتكاملة</h3>
-                <div class="plan-price">100$</div>
-                <p>مرة واحدة + تحديثات سنة</p>
+            <div class="features-grid" style="margin-top: 50px;">
+                <div class="feature-card" onclick="location.href='dashboard.html'">
+                    <div class="feature-icon" style="background: var(--primary); color: white;">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>لوحة التحكم</h3>
+                    <p>إدارة الحجوزات والإحصائيات</p>
+                </div>
                 
-                <ul style="list-style: none; padding: 20px 0; text-align: right; line-height: 2;">
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> كل ميزات الأساسية</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> لوحة تحكم متقدمة</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> تقارير وتحليلات</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> إشعارات SMS</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> دعم فني 3 شهور</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> تحديثات مجانية سنة</li>
-                </ul>
+                <div class="feature-card" onclick="location.href='booking.html'" target="_blank">
+                    <div class="feature-icon" style="background: var(--secondary); color: white;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>صفحة الحجز</h3>
+                    <p>عرض صفحة حجز المواعيد للمرضى</p>
+                </div>
                 
-                <a href="demo.html#trialForm" class="btn btn-primary" style="display: inline-block; margin-top: 20px; background: var(--secondary);">
-                    <i class="fas fa-crown"></i> الخيار الأمثل
-                </a>
+                <div class="feature-card" onclick="location.href='settings.html'">
+                    <div class="feature-icon" style="background: var(--accent); color: white;">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3>الإعدادات</h3>
+                    <p>تخصيص إعدادات النظام</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- باقات الأسعار -->
+        <section id="pricing" class="pricing">
+            <div class="section-title animate">
+                <h2>💰 باقات الأسعار</h2>
+                <p>اختر الباقة المناسبة لعيادتك. جميع الباقات تشمل دعم فني لمدة شهر</p>
             </div>
             
-            <!-- الباقة الاحترافية -->
-            <div class="pricing-card animate">
-                <h3 class="plan-name">الباقة الاحترافية</h3>
-                <div class="plan-price">200$</div>
-                <p>سنوياً (16.6$/شهر)</p>
+            <div class="pricing-cards">
+                <!-- الباقة الأساسية -->
+                <div class="pricing-card animate">
+                    <h3 class="plan-name">الباقة الأساسية</h3>
+                    <div class="plan-price">50$</div>
+                    <p>مرة واحدة فقط</p>
+                    
+                    <ul style="list-style: none; padding: 20px 0; text-align: right; line-height: 2;">
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> صفحة حجز مواعيد</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> لوحة تحكم أساسية</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> إشعارات واتساب</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> دعم فني شهر</li>
+                        <li><i class="fas fa-times" style="color: var(--accent);"></i> تقارير متقدمة</li>
+                        <li><i class="fas fa-times" style="color: var(--accent);"></i> إشعارات SMS</li>
+                    </ul>
+                    
+                    <a href="demo.html#trialForm" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">
+                        <i class="fas fa-shopping-cart"></i> اطلب الآن
+                    </a>
+                </div>
                 
-                <ul style="list-style: none; padding: 20px 0; text-align: right; line-height: 2;">
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> كل ميزات المتكاملة</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> موقع كامل للعيادة</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> متجر إلكتروني للأدوية</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> نظام نقاط ولاء</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> دعم فني سنوي</li>
-                    <li><i class="fas fa-check" style="color: var(--secondary);"></i> استضافة مجانية سنة</li>
-                </ul>
+                <!-- الباقة الأكثر شعبية -->
+                <div class="pricing-card popular animate">
+                    <div class="popular-badge">الأكثر طلباً</div>
+                    <h3 class="plan-name">الباقة المتكاملة</h3>
+                    <div class="plan-price">100$</div>
+                    <p>مرة واحدة + تحديثات سنة</p>
+                    
+                    <ul style="list-style: none; padding: 20px 0; text-align: right; line-height: 2;">
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> كل ميزات الأساسية</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> لوحة تحكم متقدمة</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> تقارير وتحليلات</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> إشعارات SMS</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> دعم فني 3 شهور</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> تحديثات مجانية سنة</li>
+                    </ul>
+                    
+                    <a href="demo.html#trialForm" class="btn btn-primary" style="display: inline-block; margin-top: 20px; background: var(--secondary);">
+                        <i class="fas fa-crown"></i> الخيار الأمثل
+                    </a>
+                </div>
                 
-                <a href="demo.html#trialForm" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">
-                    <i class="fas fa-rocket"></i> للمؤسسات الكبيرة
-                </a>
+                <!-- الباقة الاحترافية -->
+                <div class="pricing-card animate">
+                    <h3 class="plan-name">الباقة الاحترافية</h3>
+                    <div class="plan-price">200$</div>
+                    <p>سنوياً (16.6$/شهر)</p>
+                    
+                    <ul style="list-style: none; padding: 20px 0; text-align: right; line-height: 2;">
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> كل ميزات المتكاملة</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> موقع كامل للعيادة</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> متجر إلكتروني للأدوية</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> نظام نقاط ولاء</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> دعم فني سنوي</li>
+                        <li><i class="fas fa-check" style="color: var(--secondary);"></i> استضافة مجانية سنة</li>
+                    </ul>
+                    
+                    <a href="demo.html#trialForm" class="btn btn-primary" style="display: inline-block; margin-top: 20px;">
+                        <i class="fas fa-rocket"></i> للمؤسسات الكبيرة
+                    </a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
     
     <!-- الفوتر -->
-    <footer class="footer" id="contact">
+    <footer class="footer">
         <div class="footer-grid">
             <div class="footer-section">
                 <div class="logo" style="justify-content: flex-start; margin-bottom: 20px;">
@@ -577,10 +725,10 @@
             <div class="footer-section">
                 <h3>روابط سريعة</h3>
                 <ul class="footer-links">
-                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="#features">المميزات</a></li>
+                    <li><a href="#pricing">الأسعار</a></li>
                     <li><a href="demo.html">جرب النظام</a></li>
-                    <li><a href="booking.html">صفحة الحجز</a></li>
-                    <li><a href="dashboard.html">لوحة التحكم</a></li>
+                    <li><a href="booking.html" target="_blank">صفحة الحجز</a></li>
                 </ul>
             </div>
             
@@ -600,41 +748,222 @@
     </footer>
 
     <script>
-        // أنيميشن عند التمرير
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate');
-                }
-            });
-        }, observerOptions);
-
-        // مراقبة كل العناصر التي نريد أنيشن
-        document.querySelectorAll('.feature-card, .pricing-card, .section-title').forEach(el => {
-            observer.observe(el);
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من حالة تسجيل الدخول
+            checkLoginStatus();
+            
+            // إعداد نموذج تسجيل الدخول
+            setupLoginForm();
+            
+            // إعداد التنقل السلس
+            setupSmoothScroll();
+            
+            // إعداد أنيميشن التمرير
+            setupScrollAnimation();
         });
-
-        // تنعيم التمرير للروابط
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
+        
+        // التحقق من حالة تسجيل الدخول
+        function checkLoginStatus() {
+            const isLoggedIn = ClinicSystem ? ClinicSystem.isLoggedIn() : false;
+            
+            if (isLoggedIn) {
+                // المستخدم مسجل دخول
+                showLoggedInState();
+            } else {
+                // المستخدم غير مسجل دخول
+                showLoggedOutState();
+            }
+        }
+        
+        // عرض حالة تسجيل الدخول
+        function showLoggedInState() {
+            // تحديث شريط التنقل
+            const navLinks = document.getElementById('navLinks');
+            navLinks.innerHTML = `
+                <a href="#features">المميزات</a>
+                <a href="#pricing">الأسعار</a>
+                <a href="demo.html">تجربة النظام</a>
+                <div class="user-menu">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <a href="dashboard.html" class="nav-cta">
+                        <i class="fas fa-tachometer-alt"></i> لوحة التحكم
+                    </a>
+                    <a href="#" class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                    </a>
+                </div>
+            `;
+            
+            // تحديث قسم الهيرو
+            document.getElementById('hero').innerHTML = `
+                <div class="hero-content animate">
+                    <h1>مرحباً بك في نظام ClinicPro</h1>
+                    <p>يمكنك الآن إدارة عيادتك بكفاءة واحترافية. استخدم لوحة التحكم للوصول إلى جميع الميزات.</p>
+                    <div class="hero-btns">
+                        <a href="dashboard.html" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> الانتقال إلى لوحة التحكم
+                        </a>
+                        <a href="booking.html" target="_blank" class="btn btn-secondary">
+                            <i class="fas fa-external-link-alt"></i> عرض صفحة الحجز
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // إخفاء قسم تسجيل الدخول وإظهار قسم المسجلين
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('loggedInSection').style.display = 'block';
+        }
+        
+        // عرض حالة عدم تسجيل الدخول
+        function showLoggedOutState() {
+            // تحديث شريط التنقل
+            const navLinks = document.getElementById('navLinks');
+            navLinks.innerHTML = `
+                <a href="#features">المميزات</a>
+                <a href="#pricing">الأسعار</a>
+                <a href="demo.html" class="nav-cta">
+                    <i class="fas fa-play-circle"></i> جرب النظام
+                </a>
+            `;
+            
+            // تحديث قسم الهيرو
+            document.getElementById('hero').innerHTML = `
+                <div class="hero-content animate">
+                    <h1>حوّل عيادتك إلى نظام رقمي متكامل</h1>
+                    <p>نظام حجز مواعيد ذكي وإدارة كاملة للعيادات الطبية. سهل الاستخدام، فعال، وبسعر مناسب لكل عيادة</p>
+                    <div class="hero-btns">
+                        <a href="demo.html" class="btn btn-primary">
+                            <i class="fas fa-rocket"></i> جرب النظام مجاناً
+                        </a>
+                        <a href="#loginSection" class="btn btn-secondary">
+                            <i class="fas fa-sign-in-alt"></i> دخول الإدارة
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // إظهار قسم تسجيل الدخول وإخفاء قسم المسجلين
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('loggedInSection').style.display = 'none';
+        }
+        
+        // إعداد نموذج تسجيل الدخول
+        function setupLoginForm() {
+            const loginForm = document.getElementById('loginForm');
+            
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (!username || !password) {
+                        alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
+                        return;
+                    }
+                    
+                    // استخدام نظام المصادقة إذا كان متاحاً
+                    if (ClinicSystem && ClinicSystem.login) {
+                        const result = ClinicSystem.login(username, password);
+                        
+                        if (result.success) {
+                            // تسجيل الدخول الناجح
+                            checkLoginStatus();
+                        } else {
+                            alert(result.error || 'فشل تسجيل الدخول. الرجاء التحقق من البيانات.');
+                        }
+                    } else {
+                        // مصادقة بسيطة (للأغراض التوضيحية فقط)
+                        if (username === 'admin' && password === 'admin123') {
+                            // حفظ حالة تسجيل الدخول
+                            const userData = {
+                                username: 'admin',
+                                fullName: 'مدير النظام',
+                                role: 'admin',
+                                loginTime: new Date().toISOString()
+                            };
+                            
+                            localStorage.setItem('clinic_user', JSON.stringify(userData));
+                            localStorage.setItem('clinic_logged_in', 'true');
+                            
+                            // تحديث الصفحة
+                            checkLoginStatus();
+                        } else {
+                            alert('اسم المستخدم أو كلمة المرور غير صحيحة');
+                        }
+                    }
+                });
+            }
+        }
+        
+        // تسجيل الخروج
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                if (ClinicSystem && ClinicSystem.logout) {
+                    ClinicSystem.logout();
+                } else {
+                    localStorage.removeItem('clinic_user');
+                    localStorage.removeItem('clinic_logged_in');
+                }
                 
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
+                // تحديث الصفحة
+                checkLoginStatus();
+            }
+        }
+        
+        // عرض صفحة التجربة
+        function showDemo() {
+            window.location.href = 'demo.html';
+        }
+        
+        // إعادة تعيين كلمة المرور
+        function resetPassword() {
+            alert('لإعادة تعيين كلمة المرور، يرجى التواصل مع الدعم الفني على واتساب: 0551234567');
+        }
+        
+        // التنقل السلس
+        function setupSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
             });
-        });
+        }
+        
+        // أنيميشن عند التمرير
+        function setupScrollAnimation() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.feature-card, .pricing-card, .section-title, .login-container').forEach(el => {
+                observer.observe(el);
+            });
+        }
     </script>
 </body>
 </html>
