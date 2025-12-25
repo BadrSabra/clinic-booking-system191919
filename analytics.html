@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحليلات المتقدمة - ClinicPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <script src="config.js"></script>
+    <script src="setup.js"></script>
+    <style>
+        :root {
+            --primary: #2D5BFF;
+            --secondary: #00C9A7;
+            --accent: #FF6B9D;
+            --dark: #1A237E;
+            --light: #F8F9FF;
+            --sidebar-bg: #1A237E;
+            --sidebar-text: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --card-shadow: 0 5px 25px rgba(0,0,0,0.08);
+            --border-color: #E0E0E0;
+            --success: #28A745;
+            --warning: #FFC107;
+            --danger: #DC3545;
+            --info: #17A2B8;
+            --purple: #6F42C1;
+            --teal: #20C997;
+            --orange: #FD7E14;
+            --indigo: #6610F2;
+            --pink: #E83E8C;
+            --cyan: #17A2B8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* الحاوية الرئيسية */
+        .analytics-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* الهيدر */
+        .analytics-header {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            border-radius: 20px;
+            padding: 50px 40px;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            opacity: 0.1;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="white" d="M30,30 Q50,10 70,30 T90,30 Q70,50 90,70 T90,90 Q70,70 50,90 T10,90 Q30,70 10,50 T10,30 Q30,50 30,30 Z"/></svg>');
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .header-title p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .ai-status {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .ai-status h3 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-status p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* فلاتر التحليلات */
+        .analytics-filters {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            font-size: 14px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .filter-select option {
+            background: var(--dark);
+            color: white;
+        }
+
+        .filter-select:focus {
+            border-color: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+        }
+
+        .ai-suggestions {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            grid-column: 1 / -1;
+        }
+
+        .ai-suggestions h4 {
+            color: white;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .suggestions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .suggestion-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* مؤشرات التحليلات */
+        .analytics-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .indicator-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: var(--primary);
+        }
+
+        .indicator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .indicator-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .indicator-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .indicator-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .indicator-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .trend-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .trend-good {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .trend-warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+
+        .trend-bad {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+
+        /* مخططات التحليلات */
+        .analytics-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .chart-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--light) 0%, white 100%);
+        }
+
+        .chart-header h3 {
+            color: var(--dark);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            color: var(--dark);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chart-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .chart-content {
+            padding: 25px;
+            height: 400px;
+            position: relative;
+        }
+
+        /* تنبؤات الذكاء الاصطناعي */
+        .ai-predictions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .prediction-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .prediction-header {
+            padding: 25px;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+            color: white;
+            position: relative;
+        }
+
+        .prediction-header h3 {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .prediction-content {
+            padding: 30px;
+        }
+
+        .prediction-list {
+            list-style: none;
+        }
+
+        .prediction-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .prediction-item:last-child {
+            border-bottom: none;
+        }
+
+        .prediction-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .prediction-info {
+            flex: 1;
+        }
+
+        .prediction-info h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .prediction-info p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .prediction-confidence {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        /* رؤى التحليلات */
+        .analytics-insights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .insight-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .insight-header h4 {
+            color: var(--dark);
+            font-size: 18px;
+        }
+
+        .insight-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .insight-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .insight-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            color: var(--dark);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .insight-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* أدوات التحليلات */
+        .analytics-tools {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .tools-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .tools-header h2 {
+            color: var(--dark);
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .tools-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .tool-card {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .tool-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .tool-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            color: white;
+        }
+
+        .tool-card h4 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .tool-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* أزرار التحليلات */
+        .analytics-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .analytics-btn {
+            padding: 18px 35px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+
+        .analytics-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        /* متجاوبية */
+        @media (max-width: 1200px) {
+            .analytics-charts {
+                grid-template-columns: 1fr;
+            }
+            
+            .ai-predictions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .analytics-container {
+                padding: 20px;
+            }
+            
+            .analytics-header {
+                padding: 30px 20px;
+            }
+            
+            .header-top {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .analytics-filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .analytics-indicators {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .analytics-charts {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-content {
+                height: 300px;
+                padding: 15px;
+            }
+            
+            .analytics-insights {
+                grid-template-columns: 1fr;
+            }
+            
+            .analytics-actions {
+                flex-direction: column;
+            }
+            
+            .analytics-btn {
+                width: 100%;
+            }
+            
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .analytics-header {
+                padding: 20px;
+            }
+            
+            .header-title h1 {
+                font-size: 32px;
+            }
+            
+            .chart-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .chart-actions {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .prediction-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* أنيميشن */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .animate {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* تخصيص المخططات */
+        .chart-tooltip {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+        }
+
+        /* مؤشر AI */
+        .ai-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 100;
+        }
+
+        .ai-indicator-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(45, 91, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .ai-indicator-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(45, 91, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- مؤشر الذكاء الاصطناعي -->
+    <div class="ai-indicator">
+        <div class="ai-indicator-btn pulse" onclick="showAIConsole()">
+            <i class="fas fa-brain"></i>
+        </div>
+    </div>
+
+    <!-- الحاوية الرئيسية -->
+    <div class="analytics-container">
+        <!-- الهيدر -->
+        <div class="analytics-header animate">
+            <div class="header-bg"></div>
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="header-title">
+                        <h1><i class="fas fa-robot"></i> التحليلات المتقدمة</h1>
+                        <p>تحليلات ذكية مدعومة بالذكاء الاصطناعي لتحسين أداء عيادتك</p>
+                    </div>
+                    <div class="ai-status">
+                        <h3><i class="fas fa-bolt"></i> نظام الذكاء الاصطناعي نشط</h3>
+                        <p>يتعلم النظام من بياناتك لتحسين التوقعات والتوصيات</p>
+                    </div>
+                </div>
+
+                <!-- فلاتر التحليلات -->
+                <div class="analytics-filters">
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-calendar"></i> الفترة الزمنية</label>
+                        <select class="filter-select" id="timePeriod">
+                            <option value="7d">آخر 7 أيام</option>
+                            <option value="30d">آخر 30 يوم</option>
+                            <option value="90d">آخر 90 يوم</option>
+                            <option value="1y">آخر سنة</option>
+                            <option value="custom">مخصص</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-chart-bar"></i> نوع التحليل</label>
+                        <select class="filter-select" id="analysisType">
+                            <option value="performance">تحليل الأداء</option>
+                            <option value="revenue">تحليل الإيرادات</option>
+                            <option value="patients">تحليل المرضى</option>
+                            <option value="doctors">تحليل الأطباء</option>
+                            <option value="predictive">تحليل تنبؤي</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-sliders-h"></i> مستوى التفصيل</label>
+                        <select class="filter-select" id="detailLevel">
+                            <option value="basic">أساسي</option>
+                            <option value="advanced" selected>متقدم</option>
+                            <option value="expert">خبير</option>
+                        </select>
+                    </div>
+
+                    <div class="ai-suggestions">
+                        <h4><i class="fas fa-lightbulb"></i> اقتراحات الذكاء الاصطناعي</h4>
+                        <div class="suggestions-list">
+                            <button class="suggestion-btn" onclick="analyzePeakHours()">تحليل ساعات الذروة</button>
+                            <button class="suggestion-btn" onclick="predictPatientBehavior()">توقع سلوك المرضى</button>
+                            <button class="suggestion-btn" onclick="optimizeScheduling()">تحسين جدولة المواعيد</button>
+                            <button class="suggestion-btn" onclick="detectTrends()">اكتشاف الاتجاهات</button>
+                            <button class="suggestion-btn" onclick="generateInsights()">توليد رؤى تلقائية</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- مؤشرات التحليلات -->
+        <div class="analytics-indicators animate">
+            <!-- مؤشر الأداء -->
+            <div class="indicator-card">
+                <div class="indicator-header">
+                    <div>
+                        <div class="indicator-value" id="performanceScore">0%</div>
+                        <div class="indicator-label">مؤشر أداء العيادة</div>
+                        <div class="indicator-trend">
+                            <span class="trend-badge trend-good" id="performanceTrend">+5.2%</span>
+                            <span>عن الشهر الماضي</span>
+                        </div>
+                    </div>
+                    <div class="indicator-icon" style="background: linear-gradient(135deg, var(--primary) 0%, #6a11cb 100%);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i> يقيس كفاءة العمليات وجودة الخدمة
+                </div>
+            </div>
+
+            <!-- مؤشر النمو -->
+            <div class="indicator-card">
+                <div class="indicator-header">
+                    <div>
+                        <div class="indicator-value" id="growthRate">0%</div>
+                        <div class="indicator-label">معدل النمو الشهري</div>
+                        <div class="indicator-trend">
+                            <span class="trend-badge trend-good" id="growthTrend">+12.3%</span>
+                            <span>زيادة في الحجوزات</span>
+                        </div>
+                    </div>
+                    <div class="indicator-icon" style="background: linear-gradient(135deg, var(--success) 0%, #20C997 100%);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i> مقارنة بعدد الحجوزات مع الشهر السابق
+                </div>
+            </div>
+
+            <!-- مؤشر الربحية -->
+            <div class="indicator-card">
+                <div class="indicator-header">
+                    <div>
+                        <div class="indicator-value" id="profitMargin">0%</div>
+                        <div class="indicator-label">هامش الربحية</div>
+                        <div class="indicator-trend">
+                            <span class="trend-badge trend-warning" id="profitTrend">-2.1%</span>
+                            <span>انخفاض في الربحية</span>
+                        </div>
+                    </div>
+                    <div class="indicator-icon" style="background: linear-gradient(135deg, var(--warning) 0%, #FD7E14 100%);">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i> نسبة الربح إلى الإيرادات بعد التكاليف
+                </div>
+            </div>
+
+            <!-- مؤشر رضا المرضى -->
+            <div class="indicator-card">
+                <div class="indicator-header">
+                    <div>
+                        <div class="indicator-value" id="satisfactionScore">0%</div>
+                        <div class="indicator-label">رضا المرضى</div>
+                        <div class="indicator-trend">
+                            <span class="trend-badge trend-good" id="satisfactionTrend">+3.5%</span>
+                            <span>تحسن في التقييمات</span>
+                        </div>
+                    </div>
+                    <div class="indicator-icon" style="background: linear-gradient(135deg, var(--info) 0%, #17A2B8 100%);">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #999; margin-top: 15px;">
+                    <i class="fas fa-info-circle"></i> بناءً على تقييمات المرضى ومراجعاتهم
+                </div>
+            </div>
+        </div>
+
+        <!-- مخططات التحليلات -->
+        <div class="analytics-charts animate">
+            <!-- مخطط الاتجاهات الزمنية -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-line"></i> تحليل الاتجاهات الزمنية</h3>
+                    <div class="chart-actions">
+                        <button class="chart-btn" onclick="toggleTrendChart('daily')">
+                            <i class="fas fa-calendar-day"></i> يومي
+                        </button>
+                        <button class="chart-btn" onclick="toggleTrendChart('weekly')">
+                            <i class="fas fa-calendar-week"></i> أسبوعي
+                        </button>
+                        <button class="chart-btn active" onclick="toggleTrendChart('monthly')">
+                            <i class="fas fa-calendar-alt"></i> شهري
+                        </button>
+                        <button class="chart-btn" onclick="exportChart('trendChart')">
+                            <i class="fas fa-download"></i> تصدير
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- مخطط المقارنات -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-balance-scale"></i> تحليل مقارن</h3>
+                    <div class="chart-actions">
+                        <button class="chart-btn" onclick="compareWith('previous')">
+                            <i class="fas fa-history"></i> مع الفترة السابقة
+                        </button>
+                        <button class="chart-btn" onclick="compareWith('average')">
+                            <i class="fas fa-chart-bar"></i> مع المتوسط
+                        </button>
+                        <button class="chart-btn" onclick="compareWith('target')">
+                            <i class="fas fa-bullseye"></i> مع الأهداف
+                        </button>
+                        <button class="chart-btn" onclick="exportChart('comparisonChart')">
+                            <i class="fas fa-download"></i> تصدير
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-content">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- تنبؤات الذكاء الاصطناعي -->
+        <div class="ai-predictions animate">
+            <!-- تنبؤات الحجوزات -->
+            <div class="prediction-card">
+                <div class="prediction-header">
+                    <h3><i class="fas fa-crystal-ball"></i> تنبؤات الحجوزات للأسبوع القادم</h3>
+                </div>
+                <div class="prediction-content">
+                    <ul class="prediction-list" id="bookingPredictions">
+                        <!-- سيتم تعبئة التنبؤات تلقائياً -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- توصيات التحسين -->
+            <div class="prediction-card">
+                <div class="prediction-header">
+                    <h3><i class="fas fa-lightbulb"></i> توصيات تحسين الأداء</h3>
+                </div>
+                <div class="prediction-content">
+                    <ul class="prediction-list" id="improvementRecommendations">
+                        <!-- سيتم تعبئة التوصيات تلقائياً -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- رؤى التحليلات -->
+        <div class="analytics-insights animate">
+            <!-- رؤية الأداء -->
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon" style="background: linear-gradient(135deg, var(--primary) 0%, #6a11cb 100%);">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h4>أوقات الذروة الذكية</h4>
+                </div>
+                <div class="insight-content">
+                    بناءً على تحليل بيانات الحجوزات، نوصي بتخصيص مزيد من الموارد الطبية بين الساعة 10 صباحاً و2 ظهراً حيث تصل نسبة الإشغال إلى 85%.
+                </div>
+                <div class="insight-actions">
+                    <button class="insight-btn" onclick="applySchedulingOptimization()">
+                        <i class="fas fa-cog"></i> تطبيق
+                    </button>
+                    <button class="insight-btn" onclick="learnMore('peak-hours')">
+                        <i class="fas fa-info-circle"></i> تفاصيل
+                    </button>
+                </div>
+            </div>
+
+            <!-- رؤية المرضى -->
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon" style="background: linear-gradient(135deg, var(--success) 0%, #20C997 100%);">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <h4>تحليل سلوك المرضى</h4>
+                </div>
+                <div class="insight-content">
+                    تظهر البيانات أن 65% من المرضى الجدد يعودون للزيارة مرة ثانية. يمكن زيادة هذه النسبة بإضافة نظام متابعة بعد الزيارة.
+                </div>
+                <div class="insight-actions">
+                    <button class="insight-btn" onclick="setupPatientFollowup()">
+                        <i class="fas fa-bell"></i> تفعيل
+                    </button>
+                    <button class="insight-btn" onclick="learnMore('patient-behavior')">
+                        <i class="fas fa-info-circle"></i> تفاصيل
+                    </button>
+                </div>
+            </div>
+
+            <!-- رؤية الإيرادات -->
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon" style="background: linear-gradient(135deg, var(--warning) 0%, #FD7E14 100%);">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h4>تحسين مصادر الإيرادات</h4>
+                </div>
+                <div class="insight-content">
+                    خدمات المتابعة والفحوصات الدورية تشكل 40% من إيرادات العيادة. نوصي بتطوير حزم خاصة لهذه الخدمات.
+                </div>
+                <div class="insight-actions">
+                    <button class="insight-btn" onclick="createServicePackages()">
+                        <i class="fas fa-box"></i> إنشاء
+                    </button>
+                    <button class="insight-btn" onclick="learnMore('revenue-sources')">
+                        <i class="fas fa-info-circle"></i> تفاصيل
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- أدوات التحليلات -->
+        <div class="analytics-tools animate">
+            <div class="tools-header">
+                <h2><i class="fas fa-tools"></i> أدوات التحليلات المتقدمة</h2>
+                <p>استخدم أدوات الذكاء الاصطناعي لتحليل أعمق وتوقعات أدق</p>
+            </div>
+            <div class="tools-grid">
+                <div class="tool-card" onclick="openScenarioAnalyzer()">
+                    <div class="tool-icon" style="background: linear-gradient(135deg, var(--primary) 0%, #6a11cb 100%);">
+                        <i class="fas fa-chart-network"></i>
+                    </div>
+                    <h4>محلل السيناريوهات</h4>
+                    <p>محاكاة سيناريوهات مختلفة وتأثيرها على الأداء</p>
+                </div>
+
+                <div class="tool-card" onclick="openPatternDetector()">
+                    <div class="tool-icon" style="background: linear-gradient(135deg, var(--success) 0%, #20C997 100%);">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                    <h4>كاشف الأنماط</h4>
+                    <p>اكتشاف أنماط خفية في بيانات الحجوزات والمرضى</p>
+                </div>
+
+                <div class="tool-card" onclick="openOptimizationEngine()">
+                    <div class="tool-icon" style="background: linear-gradient(135deg, var(--warning) 0%, #FD7E14 100%);">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h4>محرك التحسين</h4>
+                    <p>تحسين تلقائي لجداول العمل وتوزيع الموارد</p>
+                </div>
+
+                <div class="tool-card" onclick="openPredictiveModel()">
+                    <div class="tool-icon" style="background: linear-gradient(135deg, var(--info) 0%, #17A2B8 100%);">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>النموذج التنبؤي</h4>
+                    <p>توقعات دقيقة باستخدام خوارزميات التعلم الآلي</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- أزرار التحليلات -->
+        <div class="analytics-actions animate">
+            <button class="analytics-btn btn-primary" onclick="generateFullReport()">
+                <i class="fas fa-file-alt"></i> إنشاء تقرير تحليلي كامل
+            </button>
+            <button class="analytics-btn btn-success" onclick="trainAIModel()">
+                <i class="fas fa-robot"></i> تدريب نموذج الذكاء الاصطناعي
+            </button>
+            <button class="analytics-btn btn-secondary" onclick="exportAllAnalytics()">
+                <i class="fas fa-download"></i> تصدير جميع التحليلات
+            </button>
+            <button class="analytics-btn btn-warning" onclick="scheduleAnalysis()">
+                <i class="fas fa-clock"></i> جدولة تحليل تلقائي
+            </button>
+        </div>
+    </div>
+
+    <!-- وحدة التحكم بالذكاء الاصطناعي -->
+    <div id="aiConsole" style="display: none; position: fixed; top: 0; right: 0; width: 400px; height: 100%; background: white; box-shadow: -5px 0 25px rgba(0,0,0,0.1); z-index: 1000; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="color: var(--dark);"><i class="fas fa-robot"></i> مساعد الذكاء الاصطناعي</h3>
+            <button onclick="closeAIConsole()" style="background: none; border: none; font-size: 24px; color: #666; cursor: pointer;">×</button>
+        </div>
+        <div id="aiChat" style="height: calc(100% - 150px); overflow-y: auto; margin-bottom: 20px; padding: 10px; background: var(--light); border-radius: 10px;"></div>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="aiInput" placeholder="اسأل مساعد الذكاء الاصطناعي..." style="flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px;">
+            <button onclick="sendAIQuestion()" style="background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // تهيئة نظام التحليلات
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من تسجيل الدخول
+            if (!checkAuth()) return;
+            
+            // تهيئة التحليلات
+            initializeAnalytics();
+            
+            // تحميل البيانات
+            loadAnalyticsData();
+            
+            // إنشاء المخططات
+            createCharts();
+            
+            // إعداد الأحداث
+            setupAnalyticsEvents();
+            
+            // بدء تحديث البيانات
+            startDataRefresh();
+        });
+
+        // التحقق من المصادقة
+        function checkAuth() {
+            if (typeof ClinicSystem !== 'undefined' && ClinicSystem.isLoggedIn) {
+                if (!ClinicSystem.isLoggedIn()) {
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            } else {
+                const userData = localStorage.getItem('clinic_user');
+                const loggedIn = localStorage.getItem('clinic_logged_in');
+                
+                if (!userData || loggedIn !== 'true') {
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // تهيئة التحليلات
+        function initializeAnalytics() {
+            console.log('🚀 تهيئة نظام التحليلات المتقدمة...');
+            
+            // تحديث مؤشرات النظام
+            updateSystemIndicators();
+            
+            // تحميل اقتراحات الذكاء الاصطناعي
+            loadAISuggestions();
+        }
+
+        // تحميل بيانات التحليلات
+        function loadAnalyticsData() {
+            // محاكاة جلب البيانات
+            setTimeout(() => {
+                // تحديث المؤشرات
+                updateIndicators();
+                
+                // تحميل التنبؤات
+                loadPredictions();
+                
+                // تحميل التوصيات
+                loadRecommendations();
+                
+                // تحديث الرؤى
+                updateInsights();
+                
+                // إظهار الرسالة
+                showAIMessage('تم تحميل بيانات التحليلات بنجاح! جاهز للتحليل.');
+            }, 1000);
+        }
+
+        // إنشاء المخططات
+        let trendChart = null;
+        let comparisonChart = null;
+
+        function createCharts() {
+            // مخطط الاتجاهات
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو'],
+                    datasets: [
+                        {
+                            label: 'الحجوزات الفعلية',
+                            data: [120, 145, 138, 167, 189, 210, 198],
+                            borderColor: 'rgba(45, 91, 255, 1)',
+                            backgroundColor: 'rgba(45, 91, 255, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'التوقعات',
+                            data: [null, null, null, null, null, 205, 225],
+                            borderColor: 'rgba(0, 201, 167, 1)',
+                            backgroundColor: 'rgba(0, 201, 167, 0.1)',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    family: 'Tajawal',
+                                    size: 12
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: 150,
+                                    yMax: 150,
+                                    borderColor: 'rgba(255, 107, 157, 0.8)',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'هدف الأداء',
+                                        enabled: true,
+                                        position: 'start'
+                                    }
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#333',
+                            bodyColor: '#666',
+                            borderColor: '#e0e0e0',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Tajawal'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Tajawal'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // مخطط المقارنات
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(comparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['د. أحمد', 'د. سارة', 'د. خالد', 'د. فاطمة', 'المتوسط'],
+                    datasets: [
+                        {
+                            label: 'عدد المرضى',
+                            data: [45, 38, 32, 28, 35],
+                            backgroundColor: 'rgba(45, 91, 255, 0.8)',
+                            borderColor: 'rgba(45, 91, 255, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'معدل الرضا',
+                            data: [4.8, 4.6, 4.7, 4.5, 4.6],
+                            backgroundColor: 'rgba(0, 201, 167, 0.8)',
+                            borderColor: 'rgba(0, 201, 167, 1)',
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'عدد المرضى'
+                            }
+                        },
+                        y1: {
+                            position: 'right',
+                            beginAtZero: true,
+                            max: 5,
+                            title: {
+                                display: true,
+                                text: 'معدل الرضا'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // تحديث المؤشرات
+        function updateIndicators() {
+            // قيم عشوائية للإيضاح
+            const indicators = {
+                performanceScore: Math.floor(Math.random() * 30) + 70,
+                growthRate: Math.floor(Math.random() * 20) + 5,
+                profitMargin: Math.floor(Math.random() * 30) + 15,
+                satisfactionScore: Math.floor(Math.random() * 20) + 75
+            };
+            
+            document.getElementById('performanceScore').textContent = `${indicators.performanceScore}%`;
+            document.getElementById('growthRate').textContent = `${indicators.growthRate}%`;
+            document.getElementById('profitMargin').textContent = `${indicators.profitMargin}%`;
+            document.getElementById('satisfactionScore').textContent = `${indicators.satisfactionScore}%`;
+            
+            // تحديث الاتجاهات
+            updateTrendIndicators();
+        }
+
+        function updateTrendIndicators() {
+            // قيم عشوائية للاتجاهات
+            const trends = [
+                { id: 'performanceTrend', value: `+${(Math.random() * 3).toFixed(1)}%`, type: 'good' },
+                { id: 'growthTrend', value: `+${(Math.random() * 5).toFixed(1)}%`, type: 'good' },
+                { id: 'profitTrend', value: `${Math.random() > 0.5 ? '+' : '-'}${(Math.random() * 2).toFixed(1)}%`, type: Math.random() > 0.5 ? 'good' : 'warning' },
+                { id: 'satisfactionTrend', value: `+${(Math.random() * 2).toFixed(1)}%`, type: 'good' }
+            ];
+            
+            trends.forEach(trend => {
+                const element = document.getElementById(trend.id);
+                element.textContent = trend.value;
+                element.className = `trend-badge trend-${trend.type}`;
+            });
+        }
+
+        // تحميل التنبؤات
+        function loadPredictions() {
+            const predictions = [
+                {
+                    day: 'الأحد',
+                    bookings: 45,
+                    confidence: 85,
+                    note: 'زيادة متوقعة بسبب نهاية الأسبوع'
+                },
+                {
+                    day: 'الإثنين',
+                    bookings: 38,
+                    confidence: 90,
+                    note: 'مستوى طبيعي'
+                },
+                {
+                    day: 'الثلاثاء',
+                    bookings: 52,
+                    confidence: 75,
+                    note: 'ذروة متوقعة'
+                },
+                {
+                    day: 'الأربعاء',
+                    bookings: 41,
+                    confidence: 88,
+                    note: 'مستوى أعلى من المعتاد'
+                }
+            ];
+            
+            const container = document.getElementById('bookingPredictions');
+            container.innerHTML = '';
+            
+            predictions.forEach(pred => {
+                const li = document.createElement('li');
+                li.className = 'prediction-item';
+                li.innerHTML = `
+                    <div class="prediction-icon" style="background: linear-gradient(135deg, var(--primary) 0%, #6a11cb 100%);">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="prediction-info">
+                        <h4>${pred.day}: ${pred.bookings} حجز متوقع</h4>
+                        <p>${pred.note}</p>
+                        <div class="prediction-confidence">
+                            <span style="font-size: 12px; color: #666;">دقة التنبؤ:</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${pred.confidence}%; background: linear-gradient(90deg, var(--success) 0%, var(--secondary) 100%);"></div>
+                            </div>
+                            <span style="font-size: 12px; color: var(--success); font-weight: bold;">${pred.confidence}%</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // تحميل التوصيات
+        function loadRecommendations() {
+            const recommendations = [
+                {
+                    title: 'تحسين جدولة المواعيد',
+                    description: 'إعادة توزيع المواعيد لتقليل وقت الانتظار',
+                    impact: 'عالية',
+                    confidence: 92
+                },
+                {
+                    title: 'توسيع ساعات العمل',
+                    description: 'إضافة ساعات عمل مسائية أيام الثلاثاء والخميس',
+                    impact: 'متوسطة',
+                    confidence: 85
+                },
+                {
+                    title: 'برنامج ولاء المرضى',
+                    description: 'إطلاق برنامج نقاط ومكافآت للمرضى المتكررين',
+                    impact: 'عالية',
+                    confidence: 88
+                },
+                {
+                    title: 'تحسين التواصل',
+                    description: 'إرسال تذكيرات قبل الموعد بـ 3 ساعات',
+                    impact: 'منخفضة',
+                    confidence: 78
+                }
+            ];
+            
+            const container = document.getElementById('improvementRecommendations');
+            container.innerHTML = '';
+            
+            recommendations.forEach(rec => {
+                const impactColor = rec.impact === 'عالية' ? 'var(--success)' : 
+                                  rec.impact === 'متوسطة' ? 'var(--warning)' : 'var(--danger)';
+                
+                const li = document.createElement('li');
+                li.className = 'prediction-item';
+                li.innerHTML = `
+                    <div class="prediction-icon" style="background: linear-gradient(135deg, var(--secondary) 0%, #20C997 100%);">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="prediction-info">
+                        <h4>${rec.title}</h4>
+                        <p>${rec.description}</p>
+                        <div class="prediction-confidence">
+                            <span style="font-size: 12px; color: #666;">التأثير: <strong style="color: ${impactColor}">${rec.impact}</strong></span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${rec.confidence}%; background: linear-gradient(90deg, var(--secondary) 0%, var(--info) 100%);"></div>
+                            </div>
+                            <span style="font-size: 12px; color: var(--info); font-weight: bold;">${rec.confidence}%</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // تحديث الرؤى
+        function updateInsights() {
+            // الرؤى يتم تحديثها من الخوادم
+            // هنا للتوضيح فقط
+        }
+
+        // إعداد الأحداث
+        function setupAnalyticsEvents() {
+            // تحديث الفلاتر
+            document.getElementById('timePeriod').addEventListener('change', updateAnalytics);
+            document.getElementById('analysisType').addEventListener('change', updateAnalytics);
+            document.getElementById('detailLevel').addEventListener('change', updateAnalytics);
+            
+            // أزرار المخططات
+            setupChartButtons();
+            
+            // أزرار التحليلات
+            setupAnalyticsButtons();
+        }
+
+        function updateAnalytics() {
+            showLoading(true);
+            
+            setTimeout(() => {
+                // تحديث جميع المكونات
+                updateIndicators();
+                updateChartsData();
+                loadPredictions();
+                loadRecommendations();
+                
+                showLoading(false);
+                
+                showAIMessage('تم تحديث التحليلات بناءً على الفلاتر الجديدة.');
+            }, 1000);
+        }
+
+        function updateChartsData() {
+            // تحديث بيانات المخططات
+            const newTrendData = Array(7).fill().map(() => Math.floor(Math.random() * 100) + 100);
+            trendChart.data.datasets[0].data = newTrendData;
+            trendChart.update();
+            
+            const newComparisonData = Array(5).fill().map(() => Math.floor(Math.random() * 50) + 20);
+            comparisonChart.data.datasets[0].data = newComparisonData;
+            comparisonChart.update();
+        }
+
+        // وظائف التحليلات
+        function analyzePeakHours() {
+            showAIMessage('🔍 جاري تحليل ساعات الذروة...');
+            
+            setTimeout(() => {
+                const peakHours = {
+                    morning: '10:00 - 12:00',
+                    afternoon: '14:00 - 16:00',
+                    peakPercentage: 78
+                };
+                
+                showAIMessage(`⏰ ساعات الذروة: ${peakHours.morning} و ${peakHours.afternoon}`);
+                showAIMessage(`📊 نسبة الإشغال في ساعات الذروة: ${peakHours.peakPercentage}%`);
+                showAIMessage(`💡 التوصية: زيادة عدد الأطباء المتاحين في هذه الأوقات`);
+            }, 1500);
+        }
+
+        function predictPatientBehavior() {
+            showAIMessage('🧠 جاري تحليل سلوك المرضى وتوقع أنماط الزيارة...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ اكتشفت نمطين رئيسيين:');
+                showAIMessage('1. 65% من المرضى الجدد يعودون خلال 3 أشهر');
+                showAIMessage('2. المرضى الذين يحجزون عبر الموقع أكثر التزاماً بنسبة 40%');
+            }, 2000);
+        }
+
+        function optimizeScheduling() {
+            showAIMessage('⚙️ جاري تحسين جدولة المواعيد...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ تم اقتراح تحسينات:');
+                showAIMessage('• تقليل وقت الانتظار بمقدار 15 دقيقة');
+                showAIMessage('• زيادة عدد الحجوزات اليومية بنسبة 12%');
+                showAIMessage('• تحسين توزيع الأطباء على الفترات');
+            }, 2000);
+        }
+
+        function detectTrends() {
+            showAIMessage('📈 جاري اكتشاف الاتجاهات الخفية في البيانات...');
+            
+            setTimeout(() => {
+                showAIMessage('🎯 تم اكتشاف 3 اتجاهات:');
+                showAIMessage('1. زيادة 20% في حجوزات العيادات المسائية');
+                showAIMessage('2. نمو 15% في عدد المرضى من الفئة العمرية 25-35');
+                showAIMessage('3. زيادة 25% في الحجوزات عبر تطبيق الواتساب');
+            }, 2500);
+        }
+
+        function generateInsights() {
+            showAIMessage('💡 جاري توليد رؤى تلقائية من البيانات...');
+            
+            setTimeout(() => {
+                const insights = [
+                    "زيادة الإيرادات 15% بتفعيل خدمات المتابعة",
+                    "تحسين رضا المرضى 20% بتقليل وقت الانتظار",
+                    "زيادة الكفاءة 30% بإعادة توزيع المهام"
+                ];
+                
+                insights.forEach(insight => {
+                    showAIMessage(insight);
+                });
+            }, 3000);
+        }
+
+        // وظائف المخططات
+        function toggleTrendChart(type) {
+            // تحديث أزرار التحكم
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // تحديث بيانات المخطط بناءً على النوع
+            const periods = {
+                daily: ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+                weekly: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                monthly: ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4']
+            };
+            
+            trendChart.data.labels = periods[type] || periods.monthly;
+            trendChart.update();
+            
+            showAIMessage(`تم تغيير المخطط إلى عرض ${type === 'daily' ? 'يومي' : type === 'weekly' ? 'أسبوعي' : 'شهري'}`);
+        }
+
+        function compareWith(type) {
+            showAIMessage(`🔍 جاري المقارنة ${type === 'previous' ? 'مع الفترة السابقة' : type === 'average' ? 'مع المتوسط' : 'مع الأهداف'}...`);
+            
+            setTimeout(() => {
+                const comparisons = {
+                    previous: 'المقارنة أظهرت نمو 12% عن الفترة السابقة',
+                    average: 'الأداء أعلى من المتوسط بنسبة 8%',
+                    target: 'تحقيق 85% من الأهداف المحددة'
+                };
+                
+                showAIMessage(comparisons[type] || 'تم إجراء المقارنة بنجاح');
+            }, 1500);
+        }
+
+        function exportChart(chartId) {
+            showAIMessage('📥 جاري تصدير المخطط...');
+            
+            setTimeout(() => {
+                // محاكاة تصدير المخطط
+                const chart = chartId === 'trendChart' ? trendChart : comparisonChart;
+                const url = chart.toBase64Image();
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `مخطط_${new Date().toISOString().slice(0,10)}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                showAIMessage('✅ تم تصدير المخطط بنجاح');
+            }, 1000);
+        }
+
+        // وظائف التحليلات المتقدمة
+        function generateFullReport() {
+            showLoading(true);
+            showAIMessage('📊 جاري إنشاء تقرير تحليلي كامل...');
+            
+            setTimeout(() => {
+                showLoading(false);
+                
+                // محاكاة إنشاء التقرير
+                const reportData = {
+                    performance: 'ممتاز',
+                    recommendations: 15,
+                    insights: 28,
+                    predictions: 12
+                };
+                
+                showAIMessage(`✅ تم إنشاء التقرير بنجاح:`);
+                showAIMessage(`• الأداء: ${reportData.performance}`);
+                showAIMessage(`• عدد التوصيات: ${reportData.recommendations}`);
+                showAIMessage(`• عدد الرؤى: ${reportData.insights}`);
+                showAIMessage(`• عدد التنبؤات: ${reportData.predictions}`);
+                
+                // تقديم رابط التحميل
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.download = `تقرير_تحليلي_${new Date().toISOString().slice(0,10)}.pdf`;
+                    a.textContent = 'انقر لتحميل التقرير';
+                    a.style.cssText = 'display: block; background: var(--primary); color: white; padding: 15px; text-align: center; border-radius: 8px; margin: 10px 0; text-decoration: none;';
+                    a.onclick = function(e) {
+                        e.preventDefault();
+                        showAIMessage('📥 جاري تحميل التقرير...');
+                        // محاكاة التحميل
+                    };
+                    
+                    const chat = document.getElementById('aiChat');
+                    chat.appendChild(a);
+                }, 1000);
+            }, 3000);
+        }
+
+        function trainAIModel() {
+            showAIMessage('🧠 جاري تدريب نموذج الذكاء الاصطناعي على بياناتك...');
+            showLoading(true);
+            
+            setTimeout(() => {
+                showLoading(false);
+                
+                const trainingResults = {
+                    accuracy: '94.2%',
+                    dataPoints: 12500,
+                    features: 28,
+                    status: 'ناجح'
+                };
+                
+                showAIMessage('✅ اكتمل تدريب النموذج:');
+                showAIMessage(`• الدقة: ${trainingResults.accuracy}`);
+                showAIMessage(`• نقاط البيانات: ${trainingResults.dataPoints.toLocaleString()}`);
+                showAIMessage(`• الميزات المستخدمة: ${trainingResults.features}`);
+                showAIMessage(`• الحالة: ${trainingResults.status}`);
+            }, 4000);
+        }
+
+        function exportAllAnalytics() {
+            showAIMessage('📦 جاري تصدير جميع التحليلات والبيانات...');
+            showLoading(true);
+            
+            setTimeout(() => {
+                showLoading(false);
+                
+                // محاكاة التصدير
+                const exportData = {
+                    format: 'ZIP',
+                    size: '45.2 MB',
+                    files: 8,
+                    includes: ['البيانات الخام', 'التحليلات', 'المخططات', 'التقارير']
+                };
+                
+                showAIMessage('✅ جاهز للتصدير:');
+                showAIMessage(`• الصيغة: ${exportData.format}`);
+                showAIMessage(`• الحجم: ${exportData.size}`);
+                showAIMessage(`• عدد الملفات: ${exportData.files}`);
+                showAIMessage(`• المحتويات: ${exportData.includes.join('، ')}`);
+                
+                // زر التحميل
+                setTimeout(() => {
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.download = `تحليلات_${new Date().toISOString().slice(0,10)}.zip`;
+                    a.textContent = 'تحميل جميع التحليلات';
+                    a.style.cssText = 'display: block; background: var(--success); color: white; padding: 15px; text-align: center; border-radius: 8px; margin: 10px 0; text-decoration: none;';
+                    a.onclick = function(e) {
+                        e.preventDefault();
+                        showAIMessage('⏬ جاري تحميل الملف...');
+                    };
+                    
+                    const chat = document.getElementById('aiChat');
+                    chat.appendChild(a);
+                }, 1000);
+            }, 2500);
+        }
+
+        function scheduleAnalysis() {
+            showAIMessage('⏰ جاري إعداد جدولة التحليل التلقائي...');
+            
+            setTimeout(() => {
+                const schedule = {
+                    frequency: 'أسبوعي',
+                    day: 'الأحد',
+                    time: '02:00 صباحاً',
+                    reports: ['أداء', 'إيرادات', 'مرضى', 'التنبؤات']
+                };
+                
+                showAIMessage('✅ تمت الجدولة:');
+                showAIMessage(`• التكرار: ${schedule.frequency}`);
+                showAIMessage(`• اليوم: ${schedule.day}`);
+                showAIMessage(`• الوقت: ${schedule.time}`);
+                showAIMessage(`• التقارير: ${schedule.reports.join('، ')}`);
+            }, 2000);
+        }
+
+        // وظائف الأدوات
+        function openScenarioAnalyzer() {
+            showAIMessage('🎮 فتح محلل السيناريوهات...');
+            showAIMessage('قم باختيار سيناريو للتحليل:');
+            showAIMessage('1. زيادة عدد الأطباء');
+            showAIMessage('2. توسيع ساعات العمل');
+            showAIMessage('3. إطلاق خدمة جديدة');
+            showAIMessage('4. زيادة الأسعار بنسبة 10%');
+        }
+
+        function openPatternDetector() {
+            showAIMessage('🔍 تشغيل كاشف الأنماط...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ تم اكتشاف الأنماط التالية:');
+                showAIMessage('• مرضى أيام الأحد أكثر التزاماً بنسبة 25%');
+                showAIMessage('• الحجوزات المسائية أكثر ربحية بنسبة 18%');
+                showAIMessage('• المرضى الجدد يحتاجون 3 أيام لحجز موعد ثانٍ');
+            }, 2000);
+        }
+
+        function openOptimizationEngine() {
+            showAIMessage('⚙️ تشغيل محرك التحسين...');
+            showLoading(true);
+            
+            setTimeout(() => {
+                showLoading(false);
+                
+                const optimizations = {
+                    schedule: 'تحسين 23% في جدولة المواعيد',
+                    resources: 'توفير 15% في استخدام الموارد',
+                    efficiency: 'زيادة الكفاءة 18%'
+                };
+                
+                showAIMessage('✅ تم تحقيق التحسينات التالية:');
+                showAIMessage(`• ${optimizations.schedule}`);
+                showAIMessage(`• ${optimizations.resources}`);
+                showAIMessage(`• ${optimizations.efficiency}`);
+            }, 3000);
+        }
+
+        function openPredictiveModel() {
+            showAIMessage('🧠 تحميل النموذج التنبؤي...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ النموذج جاهز للتوقعات:');
+                showAIMessage('• توقعات الحجوزات للأسبوع القادم');
+                showAIMessage('• توقعات الإيرادات للشهر القادم');
+                showAIMessage('• توقعات نمو عدد المرضى');
+                showAIMessage('• توقعات معدل الرضا');
+            }, 2000);
+        }
+
+        // وظائف الذكاء الاصطناعي
+        function showAIConsole() {
+            document.getElementById('aiConsole').style.display = 'block';
+            showAIMessage('مرحباً! أنا مساعد الذكاء الاصطناعي الخاص بنظام ClinicPro. كيف يمكنني مساعدتك اليوم؟');
+            showAIMessage('يمكنك أن تسألني عن:');
+            showAIMessage('• تحليل بيانات عيادتك');
+            showAIMessage('• توقعات للمستقبل');
+            showAIMessage('• توصيات لتحسين الأداء');
+            showAIMessage('• شرح المؤشرات والرسوم البيانية');
+        }
+
+        function closeAIConsole() {
+            document.getElementById('aiConsole').style.display = 'none';
+        }
+
+        function sendAIQuestion() {
+            const input = document.getElementById('aiInput');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            // عرض السؤال
+            showAIMessage(`👤 أنت: ${question}`, 'user');
+            
+            // مسح حقل الإدخال
+            input.value = '';
+            
+            // محاكاة الرد
+            setTimeout(() => {
+                const responses = [
+                    "بناءً على بيانات عيادتك، أرى أن هناك فرصة لتحسين الجدولة.",
+                    "تحليل البيانات يظهر نمواً إيجابياً في عدد الحجوزات الشهرية.",
+                    "أقترح مراجعة ساعات الذروة لتحسين توزيع الموارد.",
+                    "البيانات تشير إلى أن رضا المرضى في تحسن مستمر.",
+                    "هناك نمط واضح في زيادة الحجوزات خلال نهاية الأسبوع.",
+                    "التوقعات تشير إلى نمو بنسبة 15% في الإيرادات للشهر القادم."
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                showAIMessage(`🤖 المساعد: ${randomResponse}`);
+            }, 1000);
+        }
+
+        function showAIMessage(message, type = 'ai') {
+            const chat = document.getElementById('aiChat');
+            const messageDiv = document.createElement('div');
+            
+            if (type === 'user') {
+                messageDiv.style.cssText = 'background: var(--primary); color: white; padding: 12px; border-radius: 10px 0 10px 10px; margin-bottom: 10px; text-align: left; max-width: 80%; margin-right: auto;';
+            } else {
+                messageDiv.style.cssText = 'background: var(--light); color: #333; padding: 12px; border-radius: 0 10px 10px 10px; margin-bottom: 10px; text-align: right; max-width: 80%; margin-left: auto; border: 1px solid var(--border-color);';
+            }
+            
+            messageDiv.textContent = message;
+            chat.appendChild(messageDiv);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // وظائف المساعدة
+        function showLoading(show) {
+            if (show) {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'analyticsLoading';
+                loadingDiv.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(255,255,255,0.9);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                `;
+                loadingDiv.innerHTML = `
+                    <div style="width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 20px; color: var(--dark); font-size: 18px;">جاري معالجة البيانات...</p>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
+                document.body.appendChild(loadingDiv);
+            } else {
+                const loadingDiv = document.getElementById('analyticsLoading');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            }
+        }
+
+        function startDataRefresh() {
+            // تحديث البيانات كل 30 ثانية
+            setInterval(() => {
+                // تحديث المؤشرات فقط
+                updateTrendIndicators();
+            }, 30000);
+        }
+
+        // تحديث مؤشرات النظام
+        function updateSystemIndicators() {
+            // هذه الدالة تحسب المؤشرات بناءً على البيانات الفعلية
+            const bookings = JSON.parse(localStorage.getItem('clinic_bookings') || '[]');
+            const patients = JSON.parse(localStorage.getItem('clinic_patients') || '[]');
+            const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+            
+            // حسابات حقيقية يمكن إضافتها هنا
+        }
+
+        function loadAISuggestions() {
+            // تحميل اقتراحات الذكاء الاصطناعي من قاعدة البيانات
+            // حالياً محتوى ثابت
+        }
+
+        // تطبيق الرؤى
+        function applySchedulingOptimization() {
+            showAIMessage('⚙️ جاري تطبيق تحسينات الجدولة...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ تم تطبيق التحسينات:');
+                showAIMessage('• إعادة توزيع المواعيد في ساعات الذروة');
+                showAIMessage('• تقليل وقت الانتظار بمقدار 20 دقيقة');
+                showAIMessage('• زيادة عدد الحجوزات المتاحة');
+            }, 2000);
+        }
+
+        function setupPatientFollowup() {
+            showAIMessage('📞 جاري إعداد نظام المتابعة التلقائي للمرضى...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ تم تفعيل نظام المتابعة:');
+                showAIMessage('• رسائل متابعة بعد 3 أيام من الزيارة');
+                showAIMessage('• استطلاع رضا تلقائي');
+                showAIMessage('• تذكير بالمواعيد القادمة');
+            }, 2000);
+        }
+
+        function createServicePackages() {
+            showAIMessage('🎁 جاري إنشاء حزم الخدمات المميزة...');
+            
+            setTimeout(() => {
+                showAIMessage('✅ تم إنشاء 3 حزم خدمات:');
+                showAIMessage('1. الباقة الأساسية: 3 زيارات بسعر مخفض');
+                showAIMessage('2. الباقة الذهبية: 6 زيارات + فحوصات مجانية');
+                showAIMessage('3. الباقة الماسية: زيارات غير محدودة لمدة سنة');
+            }, 2000);
+        }
+
+        function learnMore(topic) {
+            const topics = {
+                'peak-hours': 'تحليل ساعات الذروة يفحص توزيع الحجوزات خلال اليوم لتحديد الأوقات الأكثر إشغالاً.',
+                'patient-behavior': 'تحليل سلوك المرضى يدرس أنماط الزيارة والعوامل المؤثرة على العودة.',
+                'revenue-sources': 'تحليل مصادر الإيرادات يحدد الخدمات الأكثر ربحية وفرص النمو.'
+            };
+            
+            showAIMessage(`📚 معلومات حول ${topic}:`);
+            showAIMessage(topics[topic] || 'معلومات إضافية غير متوفرة حالياً.');
+        }
+
+        // تصدير الدوال للاستخدام العام
+        window.$analyzePeakHours = analyzePeakHours;
+        window.$predictPatientBehavior = predictPatientBehavior;
+        window.$optimizeScheduling = optimizeScheduling;
+        window.$showAIConsole = showAIConsole;
+        window.$generateFullReport = generateFullReport;
+    </script>
+</body>
+</html>
