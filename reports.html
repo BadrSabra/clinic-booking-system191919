@@ -1,0 +1,1708 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير والإحصائيات - ClinicPro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="config.js"></script>
+    <script src="setup.js"></script>
+    <style>
+        :root {
+            --primary: #2D5BFF;
+            --secondary: #00C9A7;
+            --accent: #FF6B9D;
+            --dark: #1A237E;
+            --light: #F8F9FF;
+            --sidebar-bg: #1A237E;
+            --sidebar-text: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --card-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            --border-color: #E0E0E0;
+            --success: #28A745;
+            --warning: #FFC107;
+            --danger: #DC3545;
+            --info: #17A2B8;
+            --purple: #6F42C1;
+            --teal: #20C997;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #F5F7FA 0%, #C3CBE2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* الحاوية الرئيسية */
+        .reports-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* الهيدر */
+        .reports-header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            color: var(--dark);
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header-title p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        .clinic-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--light);
+            padding: 15px 25px;
+            border-radius: 15px;
+        }
+
+        .clinic-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .clinic-info h3 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .clinic-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* فلاتر التقارير */
+        .filters-section {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(45, 91, 255, 0.1);
+        }
+
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* بطاقات إحصائيات سريعة */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-info h3 {
+            font-size: 32px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-info p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .trend-up {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .trend-down {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+
+        /* رسوم بيانية */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .chart-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-header h3 {
+            color: var(--dark);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-content {
+            padding: 25px;
+            height: 350px;
+            position: relative;
+        }
+
+        /* تقارير مفصلة */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .report-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, var(--light) 0%, #FFFFFF 100%);
+        }
+
+        .report-header h3 {
+            color: var(--dark);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-content {
+            padding: 25px;
+        }
+
+        .report-list {
+            list-style: none;
+        }
+
+        .report-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        .report-info h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .report-info p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .report-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* أزرار التقرير */
+        .report-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        /* شريط الأدوات */
+        .tools-bar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tool-btn {
+            padding: 12px 25px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* مودال تصدير التقرير */
+        .export-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .export-content {
+            background: white;
+            border-radius: 20px;
+            width: 500px;
+            max-width: 90%;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .export-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .export-header h3 {
+            color: var(--dark);
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-body {
+            padding: 25px;
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .export-option {
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .export-option:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .export-option i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        /* متجاوبية */
+        @media (max-width: 1200px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .reports-container {
+                padding: 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .clinic-selector {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filters-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .report-actions {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .tools-bar {
+                flex-direction: column;
+            }
+            
+            .tool-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reports-header {
+                padding: 20px;
+            }
+            
+            .header-title h1 {
+                font-size: 28px;
+            }
+            
+            .chart-content {
+                padding: 15px;
+                height: 300px;
+            }
+            
+            .report-content {
+                padding: 15px;
+            }
+            
+            .report-item {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+
+        /* أنيميشن */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        /* تخصيص شارت */
+        .chart-tooltip {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reports-container">
+        <!-- الهيدر -->
+        <div class="reports-header animate">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1><i class="fas fa-chart-line"></i> التقارير والإحصائيات</h1>
+                    <p>تحليل شامل لأداء عيادتك واتخاذ قرارات مستنيرة</p>
+                </div>
+                
+                <div class="clinic-selector" id="clinicSelector">
+                    <div class="clinic-logo">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <div class="clinic-info">
+                        <h3 id="currentClinic">عيادة النخبة الطبية</h3>
+                        <p id="reportPeriod">يناير 2024</p>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+
+            <!-- فلاتر التقارير -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label class="filter-label">نوع التقرير</label>
+                    <select class="filter-select" id="reportType">
+                        <option value="daily">تقرير يومي</option>
+                        <option value="weekly">تقرير أسبوعي</option>
+                        <option value="monthly" selected>تقرير شهري</option>
+                        <option value="quarterly">تقرير ربع سنوي</option>
+                        <option value="yearly">تقرير سنوي</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">فترة التقرير</label>
+                    <div class="date-range">
+                        <input type="date" class="filter-select" id="startDate" value="2024-01-01">
+                        <input type="date" class="filter-select" id="endDate" value="2024-01-31">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">تصنيف البيانات</label>
+                    <select class="filter-select" id="dataCategory">
+                        <option value="all">جميع البيانات</option>
+                        <option value="bookings">الحجوزات فقط</option>
+                        <option value="revenue">الإيرادات فقط</option>
+                        <option value="patients">المرضى فقط</option>
+                        <option value="doctors">الأطباء فقط</option>
+                    </select>
+                </div>
+
+                <button class="filter-btn" onclick="generateReport()">
+                    <i class="fas fa-sync-alt"></i> توليد التقرير
+                </button>
+            </div>
+        </div>
+
+        <!-- إحصائيات سريعة -->
+        <div class="quick-stats animate">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary) 0%, #6a11cb 100%);">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalBookings">0</h3>
+                    <p>إجمالي الحجوزات</p>
+                    <span class="stat-trend trend-up" id="bookingsTrend">+0 عن الفترة السابقة</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--success) 0%, #20C997 100%);">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalRevenue">0</h3>
+                    <p>إجمالي الإيرادات</p>
+                    <span class="stat-trend trend-up" id="revenueTrend">+0 عن الفترة السابقة</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--info) 0%, #17A2B8 100%);">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalPatients">0</h3>
+                    <p>إجمالي المرضى</p>
+                    <span class="stat-trend trend-up" id="patientsTrend">+0 عن الفترة السابقة</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--purple) 0%, #9C27B0 100%);">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="avgRating">0.0</h3>
+                    <p>متوسط تقييم المرضى</p>
+                    <span class="stat-trend trend-up" id="ratingTrend">+0 عن الفترة السابقة</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- الرسوم البيانية -->
+        <div class="charts-section animate">
+            <!-- مخطط الحجوزات اليومية -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-bar"></i> توزيع الحجوزات اليومية</h3>
+                    <span style="color: #666; font-size: 14px;">آخر 7 أيام</span>
+                </div>
+                <div class="chart-content">
+                    <canvas id="bookingsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- مخطط الإيرادات الشهرية -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-pie"></i> توزيع الإيرادات حسب الطبيب</h3>
+                    <span style="color: #666; font-size: 14px;">الشهر الحالي</span>
+                </div>
+                <div class="chart-content">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- التقارير التفصيلية -->
+        <div class="reports-grid animate">
+            <!-- تقرير الأداء -->
+            <div class="report-card">
+                <div class="report-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> مؤشرات الأداء الرئيسية</h3>
+                </div>
+                <div class="report-content">
+                    <ul class="report-list">
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>معدل إشغال العيادة</h4>
+                                <p>النسبة المئوية للوقت المشغول</p>
+                            </div>
+                            <div class="report-value" id="occupancyRate">0%</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>متوسط وقت الانتظار</h4>
+                                <p>متوسط وقت انتظار المرضى</p>
+                            </div>
+                            <div class="report-value" id="avgWaitTime">0 دقيقة</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>معدل الإلغاء</h4>
+                                <p>نسبة الحجوزات الملغاة</p>
+                            </div>
+                            <div class="report-value" id="cancellationRate">0%</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>معدل الحضور</h4>
+                                <p>نسبة الحضور إلى إجمالي الحجوزات</p>
+                            </div>
+                            <div class="report-value" id="attendanceRate">0%</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- تقرير الأطباء -->
+            <div class="report-card">
+                <div class="report-header">
+                    <h3><i class="fas fa-user-md"></i> أداء الأطباء</h3>
+                </div>
+                <div class="report-content">
+                    <ul class="report-list" id="doctorsPerformance">
+                        <!-- سيتم تعبئة أداء الأطباء تلقائياً -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- تقرير الحجوزات -->
+            <div class="report-card">
+                <div class="report-header">
+                    <h3><i class="fas fa-calendar-alt"></i> إحصائيات الحجوزات</h3>
+                </div>
+                <div class="report-content">
+                    <ul class="report-list">
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>الحجوزات المؤكدة</h4>
+                                <p>إجمالي الحجوزات المؤكدة</p>
+                            </div>
+                            <div class="report-value" id="confirmedBookings">0</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>الحجوزات المنتظرة</h4>
+                                <p>الحجوزات التي تنتظر التأكيد</p>
+                            </div>
+                            <div class="report-value" id="pendingBookings">0</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>الحجوزات الملغاة</h4>
+                                <p>إجمالي الحجوزات الملغاة</p>
+                            </div>
+                            <div class="report-value" id="cancelledBookings">0</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>متوسط الحجوزات اليومية</h4>
+                                <p>متوسط عدد الحجوزات في اليوم</p>
+                            </div>
+                            <div class="report-value" id="avgDailyBookings">0</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- تقرير المرضى -->
+            <div class="report-card">
+                <div class="report-header">
+                    <h3><i class="fas fa-users"></i> تحليل المرضى</h3>
+                </div>
+                <div class="report-content">
+                    <ul class="report-list">
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>مرضى جدد</h4>
+                                <p>مرضى يزورون العيادة لأول مرة</p>
+                            </div>
+                            <div class="report-value" id="newPatients">0</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>مرضى متكررين</h4>
+                                <p>مرضى لديهم أكثر من زيارة</p>
+                            </div>
+                            <div class="report-value" id="returningPatients">0</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>أعلى فئة عمرية</h4>
+                                <p>الفئة العمرية الأكثر زيارة</p>
+                            </div>
+                            <div class="report-value" id="topAgeGroup">25-35</div>
+                        </li>
+                        <li class="report-item">
+                            <div class="report-info">
+                                <h4>نسبة الذكور/الإناث</h4>
+                                <p>توزيع المرضى حسب الجنس</p>
+                            </div>
+                            <div class="report-value" id="genderRatio">50%/50%</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- أزرار التقرير -->
+        <div class="report-actions animate">
+            <button class="action-btn btn-primary" onclick="exportReport('pdf')">
+                <i class="fas fa-file-pdf"></i> تصدير PDF
+            </button>
+            <button class="action-btn btn-success" onclick="exportReport('excel')">
+                <i class="fas fa-file-excel"></i> تصدير Excel
+            </button>
+            <button class="action-btn btn-secondary" onclick="printReport()">
+                <i class="fas fa-print"></i> طباعة التقرير
+            </button>
+            <button class="action-btn btn-secondary" onclick="shareReport()">
+                <i class="fas fa-share-alt"></i> مشاركة التقرير
+            </button>
+        </div>
+
+        <!-- شريط الأدوات -->
+        <div class="tools-bar animate">
+            <button class="tool-btn" onclick="comparePeriods()">
+                <i class="fas fa-balance-scale"></i> مقارنة الفترات
+            </button>
+            <button class="tool-btn" onclick="showForecast()">
+                <i class="fas fa-crystal-ball"></i> توقعات المستقبل
+            </button>
+            <button class="tool-btn" onclick="showInsights()">
+                <i class="fas fa-lightbulb"></i> رؤى ذكية
+            </button>
+            <button class="tool-btn" onclick="scheduleReport()">
+                <i class="fas fa-clock"></i> جدولة تقرير
+            </button>
+            <button class="tool-btn" onclick="showTutorial()">
+                <i class="fas fa-graduation-cap"></i> شرح التقارير
+            </button>
+        </div>
+    </div>
+
+    <!-- مودال تصدير التقرير -->
+    <div class="export-modal" id="exportModal">
+        <div class="export-content">
+            <div class="export-header">
+                <h3><i class="fas fa-download"></i> تصدير التقرير</h3>
+                <button class="modal-close" onclick="closeExportModal()">&times;</button>
+            </div>
+            <div class="export-body">
+                <div class="export-options">
+                    <div class="export-option" onclick="exportFormat('pdf')">
+                        <i class="fas fa-file-pdf"></i>
+                        <div>PDF</div>
+                        <small>مستند عالي الجودة</small>
+                    </div>
+                    <div class="export-option" onclick="exportFormat('excel')">
+                        <i class="fas fa-file-excel"></i>
+                        <div>Excel</div>
+                        <small>بيانات قابلة للتحرير</small>
+                    </div>
+                    <div class="export-option" onclick="exportFormat('csv')">
+                        <i class="fas fa-file-csv"></i>
+                        <div>CSV</div>
+                        <small>بيانات خام</small>
+                    </div>
+                    <div class="export-option" onclick="exportFormat('image')">
+                        <i class="fas fa-image"></i>
+                        <div>صورة</div>
+                        <small>مخططات وصور</small>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--dark); font-weight: 600;">
+                        <i class="fas fa-cog"></i> خيارات التصدير
+                    </label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="includeCharts" checked>
+                            <span>تضمين الرسوم البيانية</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="includeData" checked>
+                            <span>تضمين البيانات التفصيلية</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="includeInsights">
+                            <span>تضمين الرؤى والتحليلات</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button class="filter-btn" style="width: 100%; margin-top: 25px;" onclick="confirmExport()">
+                    <i class="fas fa-download"></i> بدء التصدير
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تهيئة صفحة التقارير
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من تسجيل الدخول
+            if (!checkAuth()) return;
+            
+            // تهيئة البيانات
+            initializeReports();
+            
+            // توليد التقرير الافتراضي
+            generateReport();
+            
+            // إعداد التاريخ
+            setupDates();
+            
+            // إعداد الأحداث
+            setupEvents();
+        });
+
+        // التحقق من المصادقة
+        function checkAuth() {
+            if (typeof ClinicSystem !== 'undefined' && ClinicSystem.isLoggedIn) {
+                if (!ClinicSystem.isLoggedIn()) {
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            } else {
+                const userData = localStorage.getItem('clinic_user');
+                const loggedIn = localStorage.getItem('clinic_logged_in');
+                
+                if (!userData || loggedIn !== 'true') {
+                    window.location.href = 'index.html';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // تهيئة التقارير
+        function initializeReports() {
+            // تحميل معلومات العيادة
+            loadClinicInfo();
+            
+            // إنشاء مخططات فارغة
+            createCharts();
+            
+            // تحديث التاريخ في الهيدر
+            updateReportPeriod();
+        }
+
+        // تحميل معلومات العيادة
+        function loadClinicInfo() {
+            try {
+                const settings = JSON.parse(localStorage.getItem('clinic_settings') || '{}');
+                if (settings.general && settings.general.clinicName) {
+                    document.getElementById('currentClinic').textContent = settings.general.clinicName;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في تحميل معلومات العيادة:', error);
+            }
+        }
+
+        // إعداد التواريخ
+        function setupDates() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('startDate').value = formatDate(firstDay);
+            document.getElementById('endDate').value = formatDate(lastDay);
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // تحديث فترة التقرير
+        function updateReportPeriod() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            const monthNames = [
+                'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+            ];
+            
+            if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                // نفس الشهر
+                document.getElementById('reportPeriod').textContent = 
+                    `${monthNames[start.getMonth()]} ${start.getFullYear()}`;
+            } else {
+                // فترة متعددة الشهور
+                document.getElementById('reportPeriod').textContent = 
+                    `${formatDate(start)} إلى ${formatDate(end)}`;
+            }
+        }
+
+        // إعداد الأحداث
+        function setupEvents() {
+            // تحديث فترة التقرير عند تغيير التواريخ
+            document.getElementById('startDate').addEventListener('change', updateReportPeriod);
+            document.getElementById('endDate').addEventListener('change', updateReportPeriod);
+            
+            // تحديث نوع التقرير
+            document.getElementById('reportType').addEventListener('change', generateReport);
+            document.getElementById('dataCategory').addEventListener('change', generateReport);
+            
+            // نقر على محدد العيادة
+            document.getElementById('clinicSelector').addEventListener('click', function() {
+                alert('تغيير العيادة - قيد التطوير');
+            });
+        }
+
+        // إنشاء المخططات
+        let bookingsChart = null;
+        let revenueChart = null;
+
+        function createCharts() {
+            // مخطط الحجوزات اليومية
+            const bookingsCtx = document.getElementById('bookingsChart').getContext('2d');
+            bookingsChart = new Chart(bookingsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                    datasets: [{
+                        label: 'عدد الحجوزات',
+                        data: [12, 19, 8, 15, 12, 18, 10],
+                        backgroundColor: 'rgba(45, 91, 255, 0.7)',
+                        borderColor: 'rgba(45, 91, 255, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'white',
+                            titleColor: '#333',
+                            bodyColor: '#666',
+                            borderColor: '#e0e0e0',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            ticks: {
+                                stepSize: 5
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // مخطط الإيرادات
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(revenueCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['د. أحمد محمد', 'د. سارة علي', 'د. خالد حسن', 'د. فاطمة عبدالله', 'آخرون'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: [
+                            'rgba(45, 91, 255, 0.8)',
+                            'rgba(0, 201, 167, 0.8)',
+                            'rgba(255, 107, 157, 0.8)',
+                            'rgba(111, 66, 193, 0.8)',
+                            'rgba(32, 201, 151, 0.8)'
+                        ],
+                        borderWidth: 1,
+                        borderColor: 'white'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value}% (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        // توليد التقرير
+        function generateReport() {
+            // إظهار مؤشر تحميل
+            showLoading(true);
+            
+            // محاكاة جلب البيانات
+            setTimeout(() => {
+                // بيانات عشوائية للإيضاح
+                const reportType = document.getElementById('reportType').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const dataCategory = document.getElementById('dataCategory').value;
+                
+                // تحديث الإحصائيات السريعة
+                updateQuickStats(reportType);
+                
+                // تحديث المخططات
+                updateCharts(reportType);
+                
+                // تحديث التقارير التفصيلية
+                updateDetailedReports(reportType);
+                
+                // تحديث مؤشرات الأداء
+                updatePerformanceIndicators(reportType);
+                
+                // إخفاء مؤشر التحميل
+                showLoading(false);
+                
+                // إظهار رسالة نجاح
+                showMessage('success', 'تم بنجاح', `تم توليد التقرير ${getReportTypeName(reportType)}`);
+                
+            }, 1500);
+        }
+
+        function getReportTypeName(type) {
+            const types = {
+                'daily': 'اليومي',
+                'weekly': 'الأسبوعي',
+                'monthly': 'الشهري',
+                'quarterly': 'الربع سنوي',
+                'yearly': 'السنوي'
+            };
+            return types[type] || 'الشهري';
+        }
+
+        // تحديث الإحصائيات السريعة
+        function updateQuickStats(reportType) {
+            // قيم عشوائية للإيضاح
+            const stats = {
+                totalBookings: Math.floor(Math.random() * 500) + 100,
+                totalRevenue: (Math.floor(Math.random() * 50000) + 5000).toLocaleString(),
+                totalPatients: Math.floor(Math.random() * 300) + 50,
+                avgRating: (Math.random() * 2 + 3).toFixed(1),
+                bookingsTrend: Math.floor(Math.random() * 30) + 5,
+                revenueTrend: Math.floor(Math.random() * 20) + 5,
+                patientsTrend: Math.floor(Math.random() * 25) + 5,
+                ratingTrend: (Math.random() * 0.5).toFixed(1)
+            };
+            
+            document.getElementById('totalBookings').textContent = stats.totalBookings;
+            document.getElementById('totalRevenue').textContent = stats.totalRevenue;
+            document.getElementById('totalPatients').textContent = stats.totalPatients;
+            document.getElementById('avgRating').textContent = stats.avgRating;
+            
+            document.getElementById('bookingsTrend').textContent = `+${stats.bookingsTrend}% عن الفترة السابقة`;
+            document.getElementById('revenueTrend').textContent = `+${stats.revenueTrend}% عن الفترة السابقة`;
+            document.getElementById('patientsTrend').textContent = `+${stats.patientsTrend}% عن الفترة السابقة`;
+            document.getElementById('ratingTrend').textContent = `+${stats.ratingTrend} عن الفترة السابقة`;
+        }
+
+        // تحديث المخططات
+        function updateCharts(reportType) {
+            // بيانات عشوائية للمخططات
+            const days = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+            const bookingsData = days.map(() => Math.floor(Math.random() * 20) + 5);
+            
+            // تحديث مخطط الحجوزات
+            bookingsChart.data.datasets[0].data = bookingsData;
+            bookingsChart.update();
+            
+            // بيانات عشوائية لمخطط الإيرادات
+            const revenueData = [
+                Math.floor(Math.random() * 40) + 20,
+                Math.floor(Math.random() * 30) + 15,
+                Math.floor(Math.random() * 25) + 10,
+                Math.floor(Math.random() * 20) + 5,
+                Math.floor(Math.random() * 10) + 5
+            ];
+            
+            // تحديث مخطط الإيرادات
+            revenueChart.data.datasets[0].data = revenueData;
+            revenueChart.update();
+        }
+
+        // تحديث التقارير التفصيلية
+        function updateDetailedReports(reportType) {
+            // تحديث تقرير الحجوزات
+            document.getElementById('confirmedBookings').textContent = Math.floor(Math.random() * 300) + 50;
+            document.getElementById('pendingBookings').textContent = Math.floor(Math.random() * 30) + 5;
+            document.getElementById('cancelledBookings').textContent = Math.floor(Math.random() * 20) + 2;
+            document.getElementById('avgDailyBookings').textContent = Math.floor(Math.random() * 15) + 5;
+            
+            // تحديث تقرير المرضى
+            document.getElementById('newPatients').textContent = Math.floor(Math.random() * 100) + 20;
+            document.getElementById('returningPatients').textContent = Math.floor(Math.random() * 200) + 30;
+            
+            const ageGroups = ['18-24', '25-35', '36-45', '46-60', '60+'];
+            document.getElementById('topAgeGroup').textContent = ageGroups[Math.floor(Math.random() * ageGroups.length)];
+            
+            const maleRatio = Math.floor(Math.random() * 40) + 30;
+            const femaleRatio = 100 - maleRatio;
+            document.getElementById('genderRatio').textContent = `${maleRatio}%/${femaleRatio}%`;
+            
+            // تحديث تقرير أداء الأطباء
+            updateDoctorsPerformance();
+        }
+
+        // تحديث أداء الأطباء
+        function updateDoctorsPerformance() {
+            const doctors = [
+                { name: 'د. أحمد محمد', specialty: 'أسنان', patients: 45, revenue: 12000, rating: 4.8 },
+                { name: 'د. سارة علي', specialty: 'باطنة', patients: 38, revenue: 9500, rating: 4.6 },
+                { name: 'د. خالد حسن', specialty: 'عيون', patients: 32, revenue: 8500, rating: 4.7 },
+                { name: 'د. فاطمة عبدالله', specialty: 'جلدية', patients: 28, revenue: 7500, rating: 4.5 }
+            ];
+            
+            const container = document.getElementById('doctorsPerformance');
+            container.innerHTML = '';
+            
+            doctors.forEach(doctor => {
+                const li = document.createElement('li');
+                li.className = 'report-item';
+                li.innerHTML = `
+                    <div class="report-info">
+                        <h4>${doctor.name}</h4>
+                        <p>${doctor.specialty} | ${doctor.patients} مريض</p>
+                    </div>
+                    <div>
+                        <div style="text-align: left; font-size: 18px; font-weight: bold; color: var(--primary);">
+                            ${doctor.revenue.toLocaleString()} ريال
+                        </div>
+                        <div style="font-size: 12px; color: #666;">
+                            <i class="fas fa-star" style="color: var(--warning);"></i> ${doctor.rating}/5
+                        </div>
+                    </div>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // تحديث مؤشرات الأداء
+        function updatePerformanceIndicators(reportType) {
+            document.getElementById('occupancyRate').textContent = `${Math.floor(Math.random() * 40) + 50}%`;
+            document.getElementById('avgWaitTime').textContent = `${Math.floor(Math.random() * 20) + 10} دقيقة`;
+            document.getElementById('cancellationRate').textContent = `${Math.floor(Math.random() * 10) + 5}%`;
+            document.getElementById('attendanceRate').textContent = `${Math.floor(Math.random() * 20) + 75}%`;
+        }
+
+        // تصدير التقرير
+        function exportReport(format) {
+            document.getElementById('exportModal').style.display = 'flex';
+            
+            // تخزين نوع التصدير المختار
+            window.selectedExportFormat = format;
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+
+        function exportFormat(format) {
+            window.selectedExportFormat = format;
+            
+            // تحديث واجهة الخيارات المحددة
+            document.querySelectorAll('.export-option').forEach(option => {
+                option.style.borderColor = 'var(--border-color)';
+                option.style.background = 'white';
+            });
+            
+            event.currentTarget.style.borderColor = 'var(--primary)';
+            event.currentTarget.style.background = 'var(--light)';
+        }
+
+        function confirmExport() {
+            const format = window.selectedExportFormat || 'pdf';
+            const includeCharts = document.getElementById('includeCharts').checked;
+            const includeData = document.getElementById('includeData').checked;
+            const includeInsights = document.getElementById('includeInsights').checked;
+            
+            // إظهار مؤشر تحميل
+            showLoading(true);
+            
+            // محاكاة عملية التصدير
+            setTimeout(() => {
+                showLoading(false);
+                closeExportModal();
+                
+                // إنشاء ملف وهمي للتحميل
+                const filename = `تقرير_عيادة_${new Date().toISOString().slice(0,10)}.${format}`;
+                const blob = new Blob(['محتوى التقرير المحاكى'], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showMessage('success', 'تم التصدير', `تم تصدير التقرير كـ ${format.toUpperCase()}`);
+            }, 2000);
+        }
+
+        // طباعة التقرير
+        function printReport() {
+            // إنشاء نافذة طباعة
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html dir="rtl">
+                <head>
+                    <title>تقرير العيادة - ${document.getElementById('currentClinic').textContent}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', 'Tajawal', sans-serif; padding: 40px; }
+                        .print-header { text-align: center; margin-bottom: 40px; }
+                        .print-header h1 { color: #1A237E; margin-bottom: 10px; }
+                        .print-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }
+                        .stat-box { border: 2px solid #2D5BFF; padding: 20px; border-radius: 10px; text-align: center; }
+                        .print-section { margin-bottom: 30px; }
+                        .print-section h3 { color: #1A237E; border-bottom: 2px solid #00C9A7; padding-bottom: 10px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #ddd; }
+                        th { background: #F8F9FF; color: #1A237E; }
+                        @media print {
+                            body { padding: 20px; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <h1>تقرير ${document.getElementById('reportPeriod').textContent}</h1>
+                        <h2>${document.getElementById('currentClinic').textContent}</h2>
+                        <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</p>
+                    </div>
+                    
+                    <div class="print-stats">
+                        <div class="stat-box">
+                            <h3>${document.getElementById('totalBookings').textContent}</h3>
+                            <p>إجمالي الحجوزات</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3>${document.getElementById('totalRevenue').textContent} ريال</h3>
+                            <p>إجمالي الإيرادات</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3>${document.getElementById('totalPatients').textContent}</h3>
+                            <p>إجمالي المرضى</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3>${document.getElementById('avgRating').textContent}/5</h3>
+                            <p>متوسط التقييم</p>
+                        </div>
+                    </div>
+                    
+                    <div class="print-section">
+                        <h3>أداء الأطباء</h3>
+                        <table>
+                            <tr>
+                                <th>اسم الطبيب</th>
+                                <th>التخصص</th>
+                                <th>عدد المرضى</th>
+                                <th>الإيرادات</th>
+                                <th>التقييم</th>
+                            </tr>
+                            <tr>
+                                <td>د. أحمد محمد</td>
+                                <td>أسنان</td>
+                                <td>45</td>
+                                <td>12,000 ريال</td>
+                                <td>4.8/5</td>
+                            </tr>
+                            <tr>
+                                <td>د. سارة علي</td>
+                                <td>باطنة</td>
+                                <td>38</td>
+                                <td>9,500 ريال</td>
+                                <td>4.6/5</td>
+                            </tr>
+                            <tr>
+                                <td>د. خالد حسن</td>
+                                <td>عيون</td>
+                                <td>32</td>
+                                <td>8,500 ريال</td>
+                                <td>4.7/5</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="print-section">
+                        <h3>ملخص الأداء</h3>
+                        <p>معدل إشغال العيادة: ${document.getElementById('occupancyRate').textContent}</p>
+                        <p>متوسط وقت الانتظار: ${document.getElementById('avgWaitTime').textContent}</p>
+                        <p>معدل الحضور: ${document.getElementById('attendanceRate').textContent}</p>
+                        <p>معدل الإلغاء: ${document.getElementById('cancellationRate').textContent}</p>
+                    </div>
+                    
+                    <div class="no-print" style="margin-top: 40px; text-align: center; color: #666; font-size: 12px;">
+                        <p>تم إنشاء هذا التقرير بواسطة نظام ClinicPro</p>
+                        <p>© 2024 جميع الحقوق محفوظة</p>
+                    </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 1000);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // مشاركة التقرير
+        function shareReport() {
+            const reportData = {
+                title: `تقرير ${document.getElementById('currentClinic').textContent}`,
+                text: `إحصائيات العيادة: ${document.getElementById('totalBookings').textContent} حجز، ${document.getElementById('totalRevenue').textContent} ريال`,
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                navigator.share(reportData)
+                    .then(() => showMessage('success', 'تمت المشاركة', 'تم مشاركة التقرير بنجاح'))
+                    .catch(error => showMessage('error', 'خطأ', 'فشلت عملية المشاركة'));
+            } else {
+                // نسخ الرابط لل clipboard
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => showMessage('success', 'تم النسخ', 'تم نسخ رابط التقرير'))
+                    .catch(() => alert('الرابط: ' + window.location.href));
+            }
+        }
+
+        // أدوات إضافية
+        function comparePeriods() {
+            showMessage('info', 'مقارنة الفترات', 'فتح لوحة مقارنة الفترات - قيد التطوير');
+        }
+
+        function showForecast() {
+            showMessage('info', 'التوقعات', 'عرض توقعات المستقبل - قيد التطوير');
+        }
+
+        function showInsights() {
+            const insights = [
+                "📈 ذروة الحجوزات تكون يومي الأحد والثلاثاء",
+                "💰 الطبيب د. أحمد محمد يحقق أعلى إيرادات",
+                "👥 60% من المرضى هم من الفئة العمرية 25-35",
+                "🔄 معدل تكرار الزيارات: 2.3 زيارة لكل مريض",
+                "⏰ أفضل وقت للإشغال: 10 صباحاً - 2 ظهراً"
+            ];
+            
+            let message = "🔍 رؤى ذكية من بيانات عيادتك:\n\n";
+            insights.forEach(insight => {
+                message += `• ${insight}\n`;
+            });
+            
+            alert(message);
+        }
+
+        function scheduleReport() {
+            showMessage('info', 'جدولة تقرير', 'جدولة تقارير دورية - قيد التطوير');
+        }
+
+        function showTutorial() {
+            showMessage('info', 'شرح التقارير', 'فتح دليل استخدام التقارير - قيد التطوير');
+        }
+
+        // وظائف مساعدة
+        function showLoading(show) {
+            if (show) {
+                // إظهار مؤشر تحميل
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'reportLoading';
+                loadingDiv.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(255,255,255,0.9);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                `;
+                loadingDiv.innerHTML = `
+                    <div style="width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="margin-top: 20px; color: var(--dark); font-size: 18px;">جاري معالجة البيانات...</p>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
+                document.body.appendChild(loadingDiv);
+            } else {
+                // إخفاء مؤشر التحميل
+                const loadingDiv = document.getElementById('reportLoading');
+                if (loadingDiv) {
+                    loadingDiv.remove();
+                }
+            }
+        }
+
+        function showMessage(type, title, message, duration = 5000) {
+            const types = {
+                success: { icon: '✅', color: '#28a745' },
+                error: { icon: '❌', color: '#dc3545' },
+                warning: { icon: '⚠️', color: '#ffc107' },
+                info: { icon: 'ℹ️', color: '#17a2b8' }
+            };
+            
+            const config = types[type] || types.info;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+                border-right: 5px solid ${config.color};
+                max-width: 400px;
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            `;
+            
+            messageDiv.innerHTML = `
+                <div style="font-size: 24px;">${config.icon}</div>
+                <div>
+                    <div style="font-weight: bold; color: #333; margin-bottom: 5px;">${title}</div>
+                    <div style="color: #666;">${message}</div>
+                </div>
+                <button style="background: none; border: none; font-size: 20px; color: #999; cursor: pointer; margin-right: auto;" onclick="this.parentElement.remove()">
+                    ×
+                </button>
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // إضافة أنيميشن
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => messageDiv.remove(), 300);
+                }
+            }, duration);
+        }
+
+        // تصدير الدوال للاستخدام العام
+        window.$showReportMessage = showMessage;
+        window.$generateReport = generateReport;
+        window.$exportReport = exportReport;
+    </script>
+</body>
+</html>
